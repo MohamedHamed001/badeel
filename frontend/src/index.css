@@ -1,0 +1,71 @@
+@import "tailwindcss";
+
+/* IBM Plex superfamily, bundled locally (no external font dependency). */
+@import "@fontsource/ibm-plex-sans/400.css";
+@import "@fontsource/ibm-plex-sans/500.css";
+@import "@fontsource/ibm-plex-sans/600.css";
+@import "@fontsource/ibm-plex-sans-arabic/400.css";
+@import "@fontsource/ibm-plex-sans-arabic/500.css";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+
+@theme {
+  --color-paper: #fbfaf7;
+  --color-ink: #16181a;
+  --color-ink-muted: #6b7280;
+  --color-rule: #e3e1db;
+  --color-clear: #1f6f4a;
+  --color-caution: #b45309;
+  --color-stop: #a61b1b;
+
+  --font-sans: "IBM Plex Sans", "IBM Plex Sans Arabic", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-arabic: "IBM Plex Sans Arabic", "IBM Plex Sans", sans-serif;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Small-caps section labels, drawn from printed pharmacopoeia monographs. */
+.label {
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-ink-muted);
+  font-weight: 500;
+}
+
+.mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The one animation in the app: the tier rail resolves top to bottom. */
+@keyframes railIn {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.rail-stop {
+  animation: railIn 0.32s ease both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rail-stop {
+    animation: none;
+  }
+}

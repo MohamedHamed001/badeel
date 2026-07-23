@@ -110,12 +110,15 @@ def answer(text: str,
                          reason=flag.message, flag=flag)
         for c, flag in blocked]
 
+    tier_summary = _tier_summary(cands, survivors, blocked)
+
     # 6. DECIDE
     if not survivors:
         reason = _no_survivor_reason(upstream, blocked)
         ans = _escalate(query, reason,
                         flags=[upstream] if upstream else [],
                         blocked=blocked_out)
+        ans.tier_summary = tier_summary
         # surface the drug-name-free reasons everything was blocked, so the
         # pharmacist sees the mechanism (form, combination, contraindication).
         seen = {f.message for f in ans.safety_flags}
@@ -187,8 +190,26 @@ def answer(text: str,
         substitutes=subs,
         safety_flags=[upstream] if upstream else [],
         blocked_candidates=blocked_out,
+        tier_summary=tier_summary,
         confidence=1.0, guard_trips=guard_trips, model_used=model_used)
     return finish(ans)
+
+
+def _tier_summary(cands, survivors, blocked):
+    """Per-tier generated/survived counts + a representative block reason, so the
+    frontend tier rail can render the algorithm's descent through the tiers."""
+    from .schemas import TierStat
+    survived_ings = {(c.tier, c.ingredient) for c in survivors}
+    out = []
+    for tier in ("generic", "class", "therapeutic"):
+        generated = {c.ingredient for c in cands if c.tier == tier}
+        survived = {ing for (t, ing) in survived_ings if t == tier}
+        reason = None
+        if generated and not survived:
+            reason = next((f.message for c, f in blocked if c.tier == tier), None)
+        out.append(TierStat(tier=tier, generated=len(generated),
+                            survived=len(survived), blocked_reason=reason))
+    return out
 
 
 def _narrate(query, subs, reg, meta):

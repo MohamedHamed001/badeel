@@ -8,6 +8,7 @@ refusal is a normal 200 response, never a 4xx.
 from __future__ import annotations
 
 import json
+import os
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -40,9 +41,17 @@ app.add_middleware(
 
 # ---- API routes --------------------------------------------------------
 
+# Narration (LLM rationale) is opt-in: it needs a reachable provider and loads
+# the embedding/vector stack. Off by default so the app is fast and boots with
+# no model (spec §13 degraded mode). Set BADEEL_NARRATE=1 with a provider in the
+# environment to enable grounded prose in the browser.
+NARRATE = os.getenv("BADEEL_NARRATE", "0") == "1"
+
+
 @app.post("/api/substitute", response_model=SubstitutionAnswer)
 def substitute(req: SubstituteRequest) -> SubstitutionAnswer:
-    return answer(req.text, req.patient_flags, req.concurrent_meds, get_registry())
+    return answer(req.text, req.patient_flags, req.concurrent_meds,
+                  get_registry(), narrate=NARRATE)
 
 
 @app.get("/api/registry/products")
@@ -89,7 +98,7 @@ def health():
         "provider": config.LLM_PROVIDER,
         "model": config.LLM_MODEL,
         "chroma_docs": _doc_count(),
-        "narration": "stubbed",   # deterministic pipeline until phase 4
+        "narration": "enabled" if NARRATE else "stubbed",
     }
 
 

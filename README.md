@@ -22,7 +22,7 @@ outside the retrieved candidate set. The model only writes prose.
 | 2  | Candidates + safety filter (no LLM) | ✅ done — safety **100%** |
 | 3  | FastAPI skeleton (all §7 routes) | ✅ done — 36 tests green |
 | 4  | Retrieval + chains + validator guard | ✅ done — correct **60%**, safe **100%** |
-| 5  | Frontend | ⏳ |
+| 5  | Frontend (3 views, tier rail) | ✅ done |
 | 6  | Reranker, model comparison, deploy | ⏳ |
 
 ## Results
@@ -81,8 +81,16 @@ uv pip install -r backend/requirements.txt
 python scripts/baseline.py            # writes predictions.baseline.jsonl
 python score.py predictions.baseline.jsonl
 
-cd backend && python -m pytest -q    # 36 tests
+cd backend && python -m pytest -q    # 42 tests
 uvicorn main:app --reload            # API on :8000, docs at /docs
+# BADEEL_NARRATE=1 uvicorn main:app  # opt-in LLM narration (needs a provider)
+```
+
+Frontend (Vite + React + TS + Tailwind, three views, no router):
+
+```bash
+cd frontend && npm install && npm run dev   # :5173, proxies /api to :8000
+npm run build                               # -> frontend/dist, served by FastAPI in prod
 ```
 
 Health check once running:

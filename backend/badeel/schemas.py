@@ -68,6 +68,15 @@ class Substitute(BaseModel):
     evidence: list[Citation] = Field(default_factory=list)
 
 
+class TierStat(BaseModel):
+    """Per-tier candidate accounting, for the frontend tier rail. Additive to
+    section 6: it carries no decision, only makes the algorithm visible."""
+    tier: Tier
+    generated: int
+    survived: int
+    blocked_reason: str | None = None
+
+
 class SubstitutionAnswer(BaseModel):
     query: DrugQuery
     tier: Tier
@@ -76,6 +85,7 @@ class SubstitutionAnswer(BaseModel):
     substitutes: list[Substitute] = Field(default_factory=list)
     safety_flags: list[SafetyFlag] = Field(default_factory=list)
     blocked_candidates: list[BlockedCandidate] = Field(default_factory=list)
+    tier_summary: list[TierStat] = Field(default_factory=list)
     confidence: float = 0.0
     guard_trips: int = 0
     latency_ms: int = 0
