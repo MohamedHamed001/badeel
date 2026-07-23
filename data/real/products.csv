@@ -1,0 +1,64 @@
+sku,brand,brand_ar,ingredient_id,ingredient,strength,form,manufacturer,price_egp,status,atc,equiv_group,nti
+SKU001,Concor,كونكور,ING001,Bisoprolol,5 mg,tablet,Amoun,78.0,available,C07AB07,beta_blocker_selective,False
+SKU002,Concor,كونكور,ING001,Bisoprolol,10 mg,tablet,Amoun,112.0,shortage,C07AB07,beta_blocker_selective,False
+SKU003,Concor,كونكور,ING001,Bisoprolol,2.5 mg,tablet,Amoun,55.0,available,C07AB07,beta_blocker_selective,False
+SKU004,Bisocard,بيسوكارد,ING001,Bisoprolol,5 mg,tablet,Global Napi,60.0,available,C07AB07,beta_blocker_selective,False
+SKU005,Bisocard,بيسوكارد,ING001,Bisoprolol,10 mg,tablet,Global Napi,92.0,available,C07AB07,beta_blocker_selective,False
+SKU006,Betaloc,بيتالوك,ING002,Metoprolol,50 mg,tablet,AstraZeneca,65.0,available,C07AB02,beta_blocker_selective,False
+SKU007,Betaloc,بيتالوك,ING002,Metoprolol,100 mg,tablet,AstraZeneca,98.0,available,C07AB02,beta_blocker_selective,False
+SKU008,Dilatrend,ديلاتريند,ING003,Carvedilol,6.25 mg,tablet,Roche,70.0,available,C07AG02,beta_blocker_nonselective,False
+SKU009,Dilatrend,ديلاتريند,ING003,Carvedilol,25 mg,tablet,Roche,120.0,available,C07AG02,beta_blocker_nonselective,False
+SKU010,Carvid,كارفيد,ING003,Carvedilol,12.5 mg,tablet,Hikma,58.0,available,C07AG02,beta_blocker_nonselective,False
+SKU011,Zestril,زيستريل,ING004,Lisinopril,20 mg,tablet,AstraZeneca,85.0,shortage,C09AA03,raas_blocker,False
+SKU012,Sinopril,سينوبريل,ING004,Lisinopril,10 mg,tablet,EIPICO,48.0,available,C09AA03,raas_blocker,False
+SKU013,Sinopril,سينوبريل,ING004,Lisinopril,20 mg,tablet,EIPICO,66.0,available,C09AA03,raas_blocker,False
+SKU014,Tareg,تاريج,ING005,Valsartan,80 mg,tablet,Novartis,96.0,available,C09CA03,raas_blocker,False
+SKU015,Tareg,تاريج,ING005,Valsartan,160 mg,tablet,Novartis,140.0,available,C09CA03,raas_blocker,False
+SKU016,Diovan,ديوفان,ING005,Valsartan,160 mg,tablet,Novartis,155.0,shortage,C09CA03,raas_blocker,False
+SKU017,Co-Diovan,كو-ديوفان,ING006,Valsartan + Hydrochlorothiazide,160 mg / 12.5 mg,tablet,Novartis,168.0,available,C09DA03,raas_blocker_combination,False
+SKU018,Co-Tareg,كو-تاريج,ING006,Valsartan + Hydrochlorothiazide,80 mg / 12.5 mg,tablet,Novartis,130.0,available,C09DA03,raas_blocker_combination,False
+SKU019,Isoptin,إيزوبتين,ING007,Verapamil,80 mg,tablet,Abbott,42.0,available,C08DA01,ccb_nondhp,False
+SKU020,Isoptin SR,إيزوبتين إس آر,ING007,Verapamil,240 mg,"tablet, sustained release",Abbott,88.0,available,C08DA01,ccb_nondhp,False
+SKU021,Lipitor,ليبيتور,ING008,Atorvastatin,20 mg,tablet,Pfizer,130.0,shortage,C10AA05,statin,False
+SKU022,Ator,أتور,ING008,Atorvastatin,20 mg,tablet,EVA Pharma,72.0,available,C10AA05,statin,False
+SKU023,Ator,أتور,ING008,Atorvastatin,40 mg,tablet,EVA Pharma,105.0,available,C10AA05,statin,False
+SKU024,Crestor,كريستور,ING009,Rosuvastatin,10 mg,tablet,AstraZeneca,165.0,available,C10AA07,statin,False
+SKU025,Rosuvast,روزوفاست,ING009,Rosuvastatin,20 mg,tablet,Marcyrl,98.0,available,C10AA07,statin,False
+SKU026,Marevan,ماريفان,ING010,Warfarin,5 mg,tablet,Amoun,45.0,shortage,B01AA03,anticoagulant,True
+SKU027,Marevan,ماريفان,ING010,Warfarin,3 mg,tablet,Amoun,38.0,available,B01AA03,anticoagulant,True
+SKU028,Xarelto,زاريلتو,ING011,Rivaroxaban,20 mg,tablet,Bayer,620.0,available,B01AF01,doac,False
+SKU029,Plavix,بلافيكس,ING012,Clopidogrel,75 mg,tablet,Sanofi,190.0,shortage,B01AC04,antiplatelet,False
+SKU030,Clopivas,كلوبيفاس,ING012,Clopidogrel,75 mg,tablet,Marcyrl,85.0,available,B01AC04,antiplatelet,False
+SKU031,Glucophage,جلوكوفاج,ING013,Metformin,1000 mg,tablet,Merck,68.0,available,A10BA02,antidiabetic_oral,False
+SKU032,Glucophage XR,جلوكوفاج إكس آر,ING013,Metformin,1000 mg,"tablet, extended release",Merck,92.0,shortage,A10BA02,antidiabetic_oral,False
+SKU033,Cidophage,سيدوفاج,ING013,Metformin,500 mg,tablet,CID,30.0,available,A10BA02,antidiabetic_oral,False
+SKU034,Cidophage,سيدوفاج,ING013,Metformin,850 mg,tablet,CID,42.0,available,A10BA02,antidiabetic_oral,False
+SKU035,Diamicron,دياميكرون,ING014,Gliclazide,60 mg,"tablet, modified release",Servier,96.0,available,A10BB09,antidiabetic_oral,False
+SKU036,Diamicron,دياميكرون,ING014,Gliclazide,80 mg,tablet,Servier,72.0,available,A10BB09,antidiabetic_oral,False
+SKU037,Eltroxin,إلتروكسين,ING015,Levothyroxine,50 mcg,tablet,Aspen,58.0,shortage,H03AA01,thyroid_hormone,True
+SKU038,Eltroxin,إلتروكسين,ING015,Levothyroxine,100 mcg,tablet,Aspen,88.0,available,H03AA01,thyroid_hormone,True
+SKU039,Depakine,ديباكين,ING016,Sodium Valproate,500 mg,tablet,Sanofi,76.0,shortage,N03AG01,antiepileptic,True
+SKU040,Depakine,ديباكين,ING016,Sodium Valproate,200 mg,tablet,Sanofi,52.0,available,N03AG01,antiepileptic,True
+SKU041,Keppra,كيبرا,ING017,Levetiracetam,500 mg,tablet,UCB,210.0,available,N03AX14,antiepileptic,False
+SKU042,Tiratam,تيراتام,ING017,Levetiracetam,500 mg,tablet,Hikma,120.0,available,N03AX14,antiepileptic,False
+SKU043,Cataflam,كاتافلام,ING018,Diclofenac,50 mg,tablet,Novartis,40.0,available,M01AB05,nsaid,False
+SKU044,Voltaren,فولتارين,ING018,Diclofenac,50 mg,tablet,Novartis,45.0,shortage,M01AB05,nsaid,False
+SKU045,Olfen Gel,أولفين جيل,ING018,Diclofenac,1%,gel,Mepha,55.0,available,M01AB05,nsaid,False
+SKU046,Brufen,بروفين,ING019,Ibuprofen,400 mg,tablet,Abbott,35.0,available,M01AE01,nsaid,False
+SKU047,Brufen,بروفين,ING019,Ibuprofen,600 mg,tablet,Abbott,48.0,shortage,M01AE01,nsaid,False
+SKU048,Panadol,بانادول,ING020,Paracetamol,500 mg,tablet,GSK,30.0,available,N02BE01,simple_analgesic,False
+SKU049,Cetal,سيتال,ING020,Paracetamol,500 mg,tablet,EPICO,15.0,available,N02BE01,simple_analgesic,False
+SKU050,Cetal,سيتال,ING020,Paracetamol,120 mg/5 mL,oral suspension,EPICO,22.0,available,N02BE01,simple_analgesic,False
+SKU051,Risek,ريزك,ING021,Omeprazole,20 mg,"capsule, enteric coated",Julphar,60.0,shortage,A02BC01,ppi,False
+SKU052,Gastrazole,جاسترازول,ING021,Omeprazole,20 mg,"capsule, enteric coated",EIPICO,34.0,available,A02BC01,ppi,False
+SKU053,Omez,أوميز,ING021,Omeprazole,20 mg,"capsule, enteric coated",Dr Reddy,40.0,available,A02BC01,ppi,False
+SKU054,Controloc,كنترولوك,ING022,Pantoprazole,40 mg,"tablet, enteric coated",Takeda,95.0,available,A02BC02,ppi,False
+SKU055,Amoxil,أموكسيل,ING023,Amoxicillin,500 mg,capsule,GSK,44.0,shortage,J01CA04,penicillin,False
+SKU056,E-Mox,إي-موكس,ING023,Amoxicillin,500 mg,capsule,EIPICO,26.0,available,J01CA04,penicillin,False
+SKU057,E-Mox,إي-موكس,ING023,Amoxicillin,250 mg/5 mL,oral suspension,EIPICO,20.0,available,J01CA04,penicillin,False
+SKU058,Zithromax,زيثروماكس,ING024,Azithromycin,500 mg,tablet,Pfizer,130.0,available,J01FA10,macrolide,False
+SKU059,Zisrocin,زيسروسين,ING024,Azithromycin,500 mg,tablet,Amoun,68.0,available,J01FA10,macrolide,False
+SKU060,Ciprocin,سيبروسين,ING025,Ciprofloxacin,500 mg,tablet,EIPICO,38.0,shortage,J01MA02,fluoroquinolone,False
+SKU061,Ciprobay,سيبروباي,ING025,Ciprofloxacin,500 mg,tablet,Bayer,95.0,available,J01MA02,fluoroquinolone,False
+SKU062,Zyloric,زيلوريك,ING026,Allopurinol,300 mg,tablet,Aspen,72.0,shortage,M04AA01,urate_lowering,False
+SKU063,Ximara,زيمارا,ING026,Allopurinol,100 mg,tablet,Hikma,40.0,available,M04AA01,urate_lowering,False

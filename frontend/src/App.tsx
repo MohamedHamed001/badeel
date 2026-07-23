@@ -115,10 +115,21 @@ function Header({
         </nav>
       </div>
       {health && (
-        <div className="mono hidden text-[10px] sm:block" style={{ color: "var(--color-ink-muted)" }}>
-          {health.provider} · {health.model} · {health.chroma_docs} docs ·{" "}
-          <span style={{ color: health.narration === "stubbed" ? "var(--color-caution)" : "var(--color-clear)" }}>
-            narration {health.narration}
+        <div className="mono hidden items-center gap-2 text-[10px] sm:flex" style={{ color: "var(--color-ink-muted)" }}>
+          <span
+            className="rounded-sm px-1.5 py-0.5"
+            style={{
+              background: health.dataset === "real" ? "var(--color-clear)" : "var(--color-rule)",
+              color: health.dataset === "real" ? "var(--color-paper)" : "var(--color-ink-muted)",
+            }}
+          >
+            {health.dataset === "real" ? "REAL DRUGS" : "SYNTHETIC"}
+          </span>
+          <span>
+            {health.provider} · {health.model} ·{" "}
+            <span style={{ color: health.narration === "stubbed" ? "var(--color-caution)" : "var(--color-clear)" }}>
+              narration {health.narration}
+            </span>
           </span>
         </div>
       )}

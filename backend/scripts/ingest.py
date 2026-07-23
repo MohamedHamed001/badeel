@@ -13,12 +13,13 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "backend"))
 
+from badeel.config import CHROMA_DIR, DATASET  # noqa: E402
 from badeel.retrieval import get_retriever  # noqa: E402
 
 
 def main():
     r = get_retriever()
-    print(f"indexed {r.doc_count} leaflet sections into {ROOT / 'chroma'}")
+    print(f"[{DATASET}] indexed {r.doc_count} leaflet sections into {CHROMA_DIR}")
 
 
 if __name__ == "__main__":

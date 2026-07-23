@@ -1,0 +1,49 @@
+ingredient_a,ingredient_b,severity,effect
+Bisoprolol,Verapamil,major,"Additive AV nodal suppression, risk of bradyarrhythmia"
+Bisoprolol,Gliclazide,moderate,Masks adrenergic warning signs of hypoglycaemia
+Metoprolol,Verapamil,major,Additive AV nodal suppression
+Metoprolol,Ibuprofen,moderate,NSAIDs may blunt antihypertensive effect
+Carvedilol,Gliclazide,moderate,Enhanced hypoglycaemic effect
+Carvedilol,Verapamil,major,Severe bradycardia and hypotension
+Lisinopril,Ibuprofen,major,Increased risk of acute kidney injury
+Lisinopril,Valsartan,major,"Dual RAAS blockade, hyperkalaemia and renal failure"
+Valsartan,Lisinopril,major,Dual RAAS blockade
+Valsartan,Ibuprofen,major,Increased risk of acute kidney injury
+Valsartan + Hydrochlorothiazide,Ibuprofen,major,Reduced diuretic efficacy and renal risk
+Verapamil,Bisoprolol,major,Additive AV nodal suppression
+Verapamil,Metoprolol,major,Additive AV nodal suppression
+Atorvastatin,Azithromycin,moderate,Increased myopathy risk
+Atorvastatin,Verapamil,moderate,"Raised statin levels, myopathy risk"
+Rosuvastatin,Warfarin,moderate,INR elevation reported
+Warfarin,Ibuprofen,major,Markedly increased bleeding risk
+Warfarin,Diclofenac,major,Increased bleeding risk
+Warfarin,Azithromycin,major,"Potentiates anticoagulant effect, INR rise"
+Warfarin,Amoxicillin,moderate,Possible INR elevation
+Warfarin,Sodium Valproate,major,"Displacement from protein binding, bleeding risk"
+Warfarin,Paracetamol,moderate,Prolonged regular use may raise INR
+Rivaroxaban,Ibuprofen,major,Increased bleeding risk
+Rivaroxaban,Ciprofloxacin,moderate,Raised plasma concentration
+Clopidogrel,Omeprazole,major,Reduced antiplatelet activation
+Clopidogrel,Ibuprofen,major,Increased bleeding risk
+Metformin,Ciprofloxacin,minor,Possible glycaemic fluctuation
+Gliclazide,Bisoprolol,moderate,Beta blockers mask hypoglycaemia warning signs
+Levothyroxine,Omeprazole,moderate,Reduced absorption
+Levothyroxine,Pantoprazole,moderate,Reduced absorption
+Levothyroxine,Metformin,minor,Altered glycaemic control
+Sodium Valproate,Warfarin,major,"Displacement from protein binding, bleeding risk"
+Diclofenac,Warfarin,major,Increased bleeding risk
+Diclofenac,Lisinopril,major,Acute kidney injury risk
+Ibuprofen,Warfarin,major,Markedly increased bleeding risk
+Ibuprofen,Lisinopril,major,Acute kidney injury risk
+Ibuprofen,Clopidogrel,major,Increased bleeding risk
+Paracetamol,Warfarin,moderate,Prolonged regular use may raise INR
+Omeprazole,Clopidogrel,major,Reduced antiplatelet activation
+Omeprazole,Levothyroxine,moderate,Reduced thyroid hormone absorption
+Pantoprazole,Levothyroxine,moderate,Reduced thyroid hormone absorption
+Amoxicillin,Warfarin,moderate,Possible INR elevation
+Azithromycin,Warfarin,major,Potentiates anticoagulation
+Azithromycin,Ciprofloxacin,major,Additive QT prolongation
+Ciprofloxacin,Azithromycin,major,Additive QT prolongation
+Ciprofloxacin,Rivaroxaban,moderate,Raised plasma concentration
+Ciprofloxacin,Metformin,minor,Possible glycaemic fluctuation
+Allopurinol,Warfarin,moderate,May potentiate anticoagulant effect

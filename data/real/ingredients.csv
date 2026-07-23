@@ -1,0 +1,27 @@
+ingredient_id,name,atc,atc_level4,drug_class,equiv_group,nti,is_combination,components,pregnancy,forms
+ING001,Bisoprolol,C07AB07,C07AB,Selective beta-1 adrenergic blocker,beta_blocker_selective,0,0,,Category C. Use only if benefit outweighs foetal risk.,tablet:2.5 mg/5 mg/10 mg
+ING002,Metoprolol,C07AB02,C07AB,Selective beta-1 adrenergic blocker,beta_blocker_selective,0,0,,Category C.,tablet:50 mg/100 mg
+ING003,Carvedilol,C07AG02,C07AG,Non-selective beta blocker with alpha-1 blockade,beta_blocker_nonselective,0,0,,Category C.,tablet:6.25 mg/12.5 mg/25 mg
+ING004,Lisinopril,C09AA03,C09AA,Angiotensin converting enzyme inhibitor,raas_blocker,0,0,,Contraindicated in all trimesters. Discontinue immediately if pregnancy detected.,tablet:5 mg/10 mg/20 mg
+ING005,Valsartan,C09CA03,C09CA,Angiotensin II receptor blocker,raas_blocker,0,0,,Contraindicated in all trimesters.,tablet:40 mg/80 mg/160 mg
+ING006,Valsartan + Hydrochlorothiazide,C09DA03,C09DA,Angiotensin II receptor blocker with thiazide diuretic,raas_blocker_combination,0,1,Valsartan|Hydrochlorothiazide,Contraindicated in all trimesters.,tablet:80 mg / 12.5 mg/160 mg / 12.5 mg/160 mg / 25 mg
+ING007,Verapamil,C08DA01,C08DA,Non-dihydropyridine calcium channel blocker,ccb_nondhp,0,0,,Category C.,"tablet:40 mg/80 mg; tablet, sustained release:240 mg"
+ING008,Atorvastatin,C10AA05,C10AA,HMG-CoA reductase inhibitor,statin,0,0,,Contraindicated.,tablet:10 mg/20 mg/40 mg/80 mg
+ING009,Rosuvastatin,C10AA07,C10AA,HMG-CoA reductase inhibitor,statin,0,0,,Contraindicated.,tablet:5 mg/10 mg/20 mg
+ING010,Warfarin,B01AA03,B01AA,Vitamin K antagonist anticoagulant,anticoagulant,1,0,,Contraindicated; teratogenic.,tablet:1 mg/3 mg/5 mg
+ING011,Rivaroxaban,B01AF01,B01AF,Direct factor Xa inhibitor,doac,0,0,,Contraindicated.,tablet:10 mg/15 mg/20 mg
+ING012,Clopidogrel,B01AC04,B01AC,P2Y12 antiplatelet,antiplatelet,0,0,,Use only if clearly needed.,tablet:75 mg
+ING013,Metformin,A10BA02,A10BA,Biguanide antidiabetic,antidiabetic_oral,0,0,,Compatible in pregnancy under supervision.,"tablet:500 mg/850 mg/1000 mg; tablet, extended release:1000 mg"
+ING014,Gliclazide,A10BB09,A10BB,Sulfonylurea antidiabetic,antidiabetic_oral,0,0,,Switch to insulin in pregnancy.,"tablet:80 mg; tablet, modified release:30 mg/60 mg"
+ING015,Levothyroxine,H03AA01,H03AA,Thyroid hormone,thyroid_hormone,1,0,,Continue and monitor; requirements rise.,tablet:25 mcg/50 mcg/100 mcg
+ING016,Sodium Valproate,N03AG01,N03AG,Broad spectrum antiepileptic,antiepileptic,1,0,,Contraindicated; highly teratogenic.,tablet:200 mg/500 mg
+ING017,Levetiracetam,N03AX14,N03AX,SV2A antiepileptic,antiepileptic,0,0,,Preferred antiepileptic in pregnancy where suitable.,tablet:250 mg/500 mg/1000 mg
+ING018,Diclofenac,M01AB05,M01AB,Non-steroidal anti-inflammatory drug,nsaid,0,0,,"Avoid, especially third trimester.",tablet:50 mg; gel:1%
+ING019,Ibuprofen,M01AE01,M01AE,Non-steroidal anti-inflammatory drug,nsaid,0,0,,"Avoid, especially third trimester.",tablet:400 mg/600 mg
+ING020,Paracetamol,N02BE01,N02BE,Non-opioid analgesic and antipyretic,simple_analgesic,0,0,,Analgesic of choice in pregnancy.,tablet:500 mg; oral suspension:120 mg/5 mL
+ING021,Omeprazole,A02BC01,A02BC,Proton pump inhibitor,ppi,0,0,,Considered safe where needed.,"capsule, enteric coated:20 mg/40 mg"
+ING022,Pantoprazole,A02BC02,A02BC,Proton pump inhibitor,ppi,0,0,,Considered safe where needed.,"tablet, enteric coated:20 mg/40 mg"
+ING023,Amoxicillin,J01CA04,J01CA,Aminopenicillin antibiotic,penicillin,0,0,,Considered safe.,capsule:500 mg; oral suspension:250 mg/5 mL
+ING024,Azithromycin,J01FA10,J01FA,Macrolide antibiotic,macrolide,0,0,,Considered safe where indicated.,tablet:250 mg/500 mg; oral suspension:200 mg/5 mL
+ING025,Ciprofloxacin,J01MA02,J01MA,Fluoroquinolone antibiotic,fluoroquinolone,0,0,,Avoid.,tablet:250 mg/500 mg
+ING026,Allopurinol,M04AA01,M04AA,Xanthine oxidase inhibitor,urate_lowering,0,0,,Use only if clearly needed.,tablet:100 mg/300 mg

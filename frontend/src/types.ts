@@ -105,4 +105,5 @@ export interface Health {
   model: string;
   chroma_docs: number;
   narration: string;
+  dataset: string;
 }

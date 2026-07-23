@@ -5,7 +5,14 @@ from pathlib import Path
 
 # Repo root is two levels up from this file: backend/badeel/config.py -> root
 ROOT = Path(__file__).resolve().parents[2]
-DATA = ROOT / "data"
+
+# Dataset selection. "synthetic" (default) is the graded/eval build; "real" is
+# the demo dataset of real ingredients + real Egyptian brand names in
+# data/real/. Chosen at process start via BADEEL_DATASET.
+DATASET = os.getenv("BADEEL_DATASET", "synthetic").lower()
+_REAL = DATASET == "real"
+
+DATA = ROOT / "data" / "real" if _REAL else ROOT / "data"
 
 INGREDIENTS_CSV = DATA / "ingredients.csv"
 PRODUCTS_CSV = DATA / "products.csv"
@@ -13,9 +20,8 @@ ALIASES_CSV = DATA / "aliases.csv"
 INTERACTIONS_CSV = DATA / "interactions.csv"
 LEAFLETS_DIR = DATA / "leaflets"
 
-# Persisted Chroma index (built in phase 4) and the latest eval report written
-# by score.py at the repo root.
-CHROMA_DIR = ROOT / "chroma"
+# Persisted Chroma index (per dataset) and the latest eval report at the root.
+CHROMA_DIR = ROOT / ("chroma_real" if _REAL else "chroma")
 EVAL_REPORT = ROOT / "eval_report.json"
 
 # LLM identity for /api/health, read from the environment (see .env.example).

@@ -99,6 +99,7 @@ def health():
         "model": config.LLM_MODEL,
         "chroma_docs": _doc_count(),
         "narration": "enabled" if NARRATE else "stubbed",
+        "dataset": config.DATASET,
     }
 
 
