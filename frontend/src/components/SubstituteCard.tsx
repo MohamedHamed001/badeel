@@ -16,7 +16,7 @@ export function SubstituteCard({
   narrating?: boolean;
   compact?: boolean;
 }) {
-  const { lang } = useLang();
+  const { lang, t } = useLang();
   const delta = sub.price_delta_pct;
   const deltaStr = `${delta > 0 ? "+" : ""}${delta.toFixed(0)}%`;
   const streaming = narrating || streamText.length > 0;
@@ -89,18 +89,14 @@ export function SubstituteCard({
         <p className="mt-4 text-sm leading-relaxed" style={{ color: "var(--color-ink)" }}>
           {waiting ? (
             <span className="italic" style={{ color: "var(--color-ink-muted)" }}>
-              generating rationale
+              {t("card.generating")}
+              <span
+                className="ms-1 inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse"
+                style={{ background: "var(--color-clear)" }}
+              />
             </span>
-          ) : streaming ? (
-            streamText
           ) : (
             sub.rationale
-          )}
-          {streaming && (
-            <span
-              className="ms-0.5 inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse"
-              style={{ background: "var(--color-clear)" }}
-            />
           )}
         </p>
       )}

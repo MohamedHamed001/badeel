@@ -127,6 +127,22 @@ MESSAGES: dict[str, dict[str, str]] = {
         "en": "A same-class option was avoided: {effect}",
         "ar": "تم تجنّب خيار من نفس الفئة بسبب: {effect}",
     },
+    # deterministic fallback rationale (used if the guard drops the LLM prose)
+    "rationale.fb.generic": {
+        "en": "Same active ingredient and strength as the original — a direct "
+              "generic substitution.",
+        "ar": "نفس المادة الفعّالة والتركيز مثل الأصل — استبدال جنيس مباشر.",
+    },
+    "rationale.fb.class": {
+        "en": "Same therapeutic class as the original; review the dose-conversion "
+              "counselling below.",
+        "ar": "نفس الفئة العلاجية للأصل؛ راجع إرشادات تحويل الجرعة أدناه.",
+    },
+    "rationale.fb.therapeutic": {
+        "en": "A therapeutic alternative in the same clinical category; review the "
+              "counselling below.",
+        "ar": "بديل علاجي ضمن نفس الفئة السريرية؛ راجع الإرشادات أدناه.",
+    },
     # --- trace step names ---------------------------------------------------
     "trace.resolve": {"en": "Resolve", "ar": "تحديد الدواء"},
     "trace.nti": {"en": "NTI gate", "ar": "بوابة المؤشر الضيق"},

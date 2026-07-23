@@ -106,19 +106,22 @@ def substitute_stream(req: SubstituteRequest):
                          | reg.components(sub.ingredient) | reg.components(q.ingredient))
             forbidden = sorted(set(reg.ing_by_name) - permitted)
 
-            acc = ""
-            for chunk in stream_rationale(
-                    get_llm(), brand=sub.brand, ingredient=sub.ingredient,
-                    queried_brand=q.resolved_brand, tier=sub.tier,
-                    flags=sub.counselling_flags, evidence=evidence, lang=req.lang,
-                    brand_only=reg.is_combination(sub.ingredient)):
-                acc += chunk
-                yield _sse("delta", {"i": 0, "text": chunk})
+            # Accumulate the whole rationale, then validate — we never emit
+            # partial tokens, so the client can't show text that later retracts.
+            acc = "".join(stream_rationale(
+                get_llm(), brand=sub.brand, ingredient=sub.ingredient,
+                queried_brand=q.resolved_brand, tier=sub.tier,
+                flags=sub.counselling_flags, evidence=evidence, lang=req.lang,
+                brand_only=reg.is_combination(sub.ingredient)))
 
             low = acc.lower()
             leaked = any(d.lower() in low for d in forbidden)
             if not acc.strip() or leaked:
-                yield _sse("done", {"i": 0, "rationale": "", "guard_trip": True})
+                # guard dropped the prose — fall back to a safe deterministic
+                # sentence so the recommendation is never left unexplained
+                from badeel.i18n import t
+                fallback = t(req.lang, f"rationale.fb.{sub.tier}")
+                yield _sse("done", {"i": 0, "rationale": fallback, "guard_trip": True})
             else:
                 cites = [Citation(leaflet=c["leaflet"], section=c["section"],
                                   snippet=c["text"][:190]).model_dump()

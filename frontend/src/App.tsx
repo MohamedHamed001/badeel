@@ -53,9 +53,11 @@ export default function App() {
           setLoading(false); // deterministic result is ready; prose streams next
         },
         onNarrating: () => setNarrating(true),
-        onDelta: (i, text) => {
-          if (i === 0) setStreamText((t) => t + text);
-        },
+        // We intentionally do NOT render tokens live: the leak-guard validates
+        // only once the prose is complete, so a live stream could show text and
+        // then retract it. Show a 'generating' indicator instead, reveal the
+        // full validated rationale on done.
+        onDelta: () => {},
         onDone: (i, d) => {
           setStreamText("");
           setNarrating(false);
