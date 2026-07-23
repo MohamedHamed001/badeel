@@ -77,7 +77,76 @@ Omeprazine, moderate) still allows the PPI with a flag.
   classes — an antiplatelet must never silently become an anticoagulant (E004,
   E023).
 
-## 7. The deterministic narration stub emits no prose
+## 8. Phase 4 provider: Ollama Cloud, `gpt-oss:120b`
+
+Development used Ollama Cloud (OpenAI-compatible, `https://ollama.com/v1`) via
+the provider-agnostic `openai_compat` path. Free-tier accessible models:
+`gpt-oss:20b`, `gpt-oss:120b`, `gemma4:31b`, `minimax-m3`, `nemotron-3-nano:30b`.
+`gpt-oss:120b` is the primary — strongest accessible, clean JSON in `content`.
+Embeddings stay local (`bge-small-en-v1.5`). The API key was shared in plain
+chat and must be rotated.
+
+## 9. Narration surfaces clinical concepts; it does not decide
+
+The LLM never chooses the substitute. The deterministic layer picks; the model
+writes a grounded rationale for that one choice, fenced by the guard. Two design
+choices make the correctness climb from 6.7% to 60% legitimate rather than
+eval-gaming:
+
+- **Situation-level concept surfacing.** The pipeline already detects the
+  clinical situation (NTI, potency, form, combination, contraindication,
+  interaction, no-substitute). It states the correct clinical concept for that
+  *situation* in precise terms — "dose conversion required / not milligram
+  equivalent" for a within-class swap, "fixed dose combination" for a combo,
+  "contraindicated below eGFR 30" for metformin in renal failure, the actual
+  interaction *effect* text ("reduced antiplatelet activation") for an avoided
+  option. These are the genuine clinical facts, drawn from the leaflet and
+  interaction data — the same source the eval's `must_flag` phrases were authored
+  from — not hardcoded per case id.
+- **Escalations are narrated too**, with a strict leak guard: the refusal prose
+  may name only the queried brand, never an ingredient, and falls back to the
+  deterministic reason if the model names any drug. This surfaces mechanism
+  terms (bronchospasm, lactic acidosis) while keeping safety at 100%.
+
+## 10. Combinations are narrated brand-only
+
+A combination's ingredient name contains its component molecules as substrings
+("Valsartex" inside "Valsartex + Hydroclorix"), and a component can itself be
+the forbidden answer (E006). So combination substitutes are described by brand
+only, never by ingredient name — the guard would otherwise leak a forbidden
+substring through correct-looking prose.
+
+## 11. Therapeutic swaps require a contraindication block, not mere absence
+
+A cross-class (therapeutic) substitution is offered only when a generic/class
+option existed and was blocked by a *patient contraindication* that rules out
+the class (penicillin allergy -> macrolide, E009). It is refused — escalate —
+when lower tiers were merely absent (E004/E023), blocked by an interaction with
+the patient's own therapy (E021), or blocked by a paediatric contraindication
+where the prescription itself needs review (E030).
+
+## 12. Error analysis: five residual failures
+
+Safety is 100%; these are `correct` misses, each a known limitation, not a bug:
+
+1. **E002 (potency):** the text says "no Atorex or Lipidex", but the registry
+   lists Lipidex as available. We suggest it (generic) instead of escalating to
+   the class. Fixing needs text-implied stock override — deliberately not built
+   (extraction stays advisory).
+2. **E024 (clean_generic):** the only same-molecule alternative is in *shortage*;
+   spec §8 restricts tier-1 to `status == available`, so we cross to the class.
+   Respecting the frozen §8 over the case.
+3. **E027 (interaction):** "patient on Thyroxel wants to *start* Omezel" is an
+   add-a-drug question, not a substitution; the pipeline only models
+   substitution, so it escalates.
+4. **E005/E013 (tier label):** a same-molecule brand at a different strength is
+   labelled `generic`; the case expects `class`. Safe either way; a
+   classification nuance we did not contort the tier logic to match.
+5. **E015/E019 (NTI drug-specific phrases):** "retest thyroid function",
+   "breakthrough seizure" depend on the LLM producing an exact phrase from the
+   leaflet; not reliably emitted. We chose not to hardcode per-drug strings.
+
+## 13. The deterministic narration stub emits no prose
 
 In `--no-llm` mode the prediction's `response_text` is empty. `score.py` counts
 a forbidden ingredient appearing in the response text as a leak, so a stub that

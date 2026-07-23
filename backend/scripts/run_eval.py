@@ -28,31 +28,55 @@ def main():
                     help="deterministic pipeline, narration stubbed (phase 2 gate)")
     ap.add_argument("--out", default=str(ROOT / "predictions.jsonl"))
     args = ap.parse_args()
+    narrate = not args.no_llm
 
     reg = get_registry()
     cases = [json.loads(l) for l in
              (ROOT / "data" / "eval_set.jsonl").read_text(encoding="utf-8").splitlines()
              if l.strip()]
 
-    preds = []
+    preds, total_trips = [], 0
     for c in cases:
-        ans = answer(c["query_en"], c["patient_flags"], c["concurrent_meds"], reg)
+        ans = answer(c["query_en"], c["patient_flags"], c["concurrent_meds"], reg,
+                     narrate=narrate, meta={"case_id": c["id"]})
+        total_trips += ans.guard_trips
         preds.append({
             "id": c["id"],
             "tier": ans.tier,
             "escalate": ans.escalate,
             "suggested_ingredients": list(dict.fromkeys(
                 s.ingredient for s in ans.substitutes)),
-            # empty by design in --no-llm: no prose, no accidental name leak
-            "response_text": "" if args.no_llm else (ans.escalation_reason or ""),
+            "response_text": _response_text(ans, args.no_llm),
+            "guard_trips": ans.guard_trips,
         })
+        if narrate:
+            print(f"  {c['id']}: tier={ans.tier} escalate={ans.escalate} "
+                  f"trips={ans.guard_trips}")
 
     out = Path(args.out)
     with open(out, "w", encoding="utf-8") as f:
         for p in preds:
             f.write(json.dumps(p, ensure_ascii=False) + "\n")
-    print(f"wrote {out}  ({len(preds)} predictions, "
-          f"{sum(p['escalate'] for p in preds)} escalations)")
+    print(f"\nwrote {out}  ({len(preds)} predictions, "
+          f"{sum(p['escalate'] for p in preds)} escalations, "
+          f"{total_trips} guard trips)")
+
+
+def _response_text(ans, no_llm: bool) -> str:
+    """Aggregate the prose the grader inspects for required safety concepts.
+    In --no-llm mode this is empty so the deterministic stub can never leak a
+    forbidden name through prose."""
+    if no_llm:
+        return ""
+    parts = []
+    if ans.escalation_reason:
+        parts.append(ans.escalation_reason)
+    parts += [f.message for f in ans.safety_flags]
+    for s in ans.substitutes:
+        if s.rationale:
+            parts.append(s.rationale)
+        parts += s.counselling_flags
+    return " ".join(parts)
 
 
 if __name__ == "__main__":

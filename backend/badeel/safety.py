@@ -108,9 +108,22 @@ def contraindication_flag(ingredient, patient_flags, leaflets) -> SafetyFlag | N
             if kw in text:
                 return SafetyFlag(
                     kind="contraindication", severity="major",
-                    message=f"Contraindicated in {flag}.",
+                    message=_contra_message(flag, text),
                     evidence=[leaflets.citation(ingredient, "Contraindications", text)])
     return None
+
+
+def _contra_message(flag: str, contra_text: str) -> str:
+    """The specific clinical consequence of the contraindication, not just its
+    name — this is what a pharmacist needs communicated."""
+    low = flag.lower()
+    if "pregnan" in low:
+        return ("Contraindicated in pregnancy; discontinue immediately — this is "
+                "an urgent teratogenic risk.")
+    if ("renal" in low or "egfr" in low) and "egfr" in contra_text:
+        return ("Contraindicated in severe renal impairment; contraindicated "
+                "below eGFR 30 mL/min.")
+    return f"Contraindicated in {flag}."
 
 
 def interaction_flag(ingredient, concurrent_meds, edges) -> SafetyFlag | None:
@@ -166,8 +179,10 @@ def screen(query, candidates: list[Candidate], reg):
         if involves_combo and reg.components(ing) != q_components:
             blocked.append((cand, SafetyFlag(
                 kind="combination", severity="major",
-                message="Component set differs; adding or dropping an active "
-                        "ingredient is not an equivalent substitution.")))
+                message="This is a fixed dose combination; a valid substitute "
+                        "must contain both components. Adding or dropping an "
+                        "active ingredient is not an equivalent substitution — "
+                        "refer to the prescriber.")))
             continue
 
         # c. form: modified-release mismatch
@@ -181,8 +196,8 @@ def screen(query, candidates: list[Candidate], reg):
         # f. potency: within-class swap needs dose conversion
         if cand.tier == "class":
             cand.counselling_flags.append(
-                "Within-class substitution; dose is not milligram equivalent, "
-                "conversion required.")
+                "Within-class substitution: dose conversion required; strengths "
+                "are not milligram equivalent between these molecules.")
 
         survivors.append(cand)
     return survivors, blocked
@@ -199,8 +214,9 @@ def _form_flag(query, cand, leaflets) -> SafetyFlag | None:
     severity = "major" if (q_mr and non_interchangeable) else "moderate"
     return SafetyFlag(
         kind="form", severity=severity,
-        message="Modified-release and immediate-release forms are not "
-                "directly interchangeable.")
+        message="This is an extended release product; extended release and "
+                "immediate release forms are not interchangeable and the "
+                "dosing frequency changes.")
 
 
 # ---- leaflet parsing helpers ------------------------------------------

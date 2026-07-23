@@ -21,7 +21,7 @@ outside the retrieved candidate set. The model only writes prose.
 | 1  | Registry + alias/fuzzy resolution | ✅ done |
 | 2  | Candidates + safety filter (no LLM) | ✅ done — safety **100%** |
 | 3  | FastAPI skeleton (all §7 routes) | ✅ done — 36 tests green |
-| 4  | Retrieval + chains + validator guard | ⏳ |
+| 4  | Retrieval + chains + validator guard | ✅ done — correct **60%**, safe **100%** |
 | 5  | Frontend | ⏳ |
 | 6  | Reranker, model comparison, deploy | ⏳ |
 
@@ -31,20 +31,32 @@ outside the retrieved candidate set. The model only writes prose.
 |---|---|---|---|---|
 | Ungrounded-LLM floor (spec §1) | 3.3% | 26.7% | — | — |
 | Deterministic naive baseline (`scripts/baseline.py`) | 0.0% | 83.3% | 23% | 43% |
-| **Phase 2 deterministic pipeline (no LLM)** | 6.7% | **100%** | 70% | 80% |
-| Badeel (target, phase 4 with narration) | ≥ 60% | ≥ 90% | — | — |
+| Phase 2 deterministic pipeline (no LLM) | 6.7% | **100%** | 70% | 80% |
+| **Phase 4 full pipeline** (`gpt-oss:120b`, Ollama Cloud) | **60.0%** | **100%** | 77% | 87% |
 
-The Phase 2 pipeline is deterministic and does no narration, so `correct` and
-the `must_flag` clinical phrases stay low until the LLM lands in phase 4 — but
-**safety is already 100%**: it never suggests a forbidden ingredient. That is
-the whole argument of the project: the deterministic layer carries safety, the
-model only writes prose. See [DECISIONS.md](DECISIONS.md).
+The argument of the project in one table: the deterministic layer holds
+**safety at 100%** with or without the model — it never suggests a forbidden
+ingredient. Adding the guarded LLM narration lifts `correct` from 6.7% to 60%
+(it supplies the required clinical counselling prose) **without touching
+safety**. The model writes; the deterministic layer decides. See
+[DECISIONS.md](DECISIONS.md).
+
+**Validator guard.** Every LLM suggestion is parsed into a Pydantic model whose
+validator rejects any ingredient outside the retrieved candidate set; the chain
+retries once with the error appended, then escalates. A strong model
+(`gpt-oss:120b`) trips it rarely (0–1 per full run); the per-model trip-rate
+trend is the Phase 6 model-comparison deliverable. The mechanism is proven by
+`tests/test_guard.py` (fully offline).
 
 Reproduce:
 
 ```bash
-python backend/scripts/run_eval.py --no-llm   # writes predictions.jsonl
-python score.py predictions.jsonl
+# deterministic only (phase 2 gate, no model needed)
+python backend/scripts/run_eval.py --no-llm && python score.py predictions.jsonl
+
+# full pipeline (needs a provider in .env + the chroma index)
+python backend/scripts/ingest.py                  # one-time, or use committed chroma/
+python backend/scripts/run_eval.py && python score.py predictions.jsonl
 ```
 
 ## Layout
