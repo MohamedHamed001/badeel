@@ -1,5 +1,6 @@
 import type { RegistryOptions, SubstitutionAnswer } from "../types";
 import { verdict, toneColor } from "../verdict";
+import { useLang } from "../LangContext";
 import { QueryBar } from "../components/QueryBar";
 import { TierRail } from "../components/TierRail";
 import { SubstituteCard } from "../components/SubstituteCard";
@@ -8,6 +9,7 @@ import { BlockedList } from "../components/BlockedList";
 import { AuditTrail } from "../components/AuditTrail";
 
 type Query = { text: string; patient_flags: string[]; concurrent_meds: string[] };
+type Example = { en: string; ar: string; q: Query };
 
 interface Props {
   options: RegistryOptions | null;
@@ -21,18 +23,18 @@ interface Props {
   error: string | null;
 }
 
-const EXAMPLES: Record<string, { label: string; q: Query }[]> = {
+const EXAMPLES: Record<string, Example[]> = {
   real: [
-    { label: "Concor 5 short, patient has asthma", q: { text: "Concor 5 mg is short and the patient has asthma", patient_flags: ["bronchial asthma"], concurrent_meds: [] } },
-    { label: "Risek out, patient on Plavix", q: { text: "Risek is out and the patient takes Plavix", patient_flags: [], concurrent_meds: ["Clopidogrel"] } },
-    { label: "Marevan 5 mg is short", q: { text: "Marevan 5 mg is short", patient_flags: [], concurrent_meds: [] } },
-    { label: "Lipitor 20 out of stock", q: { text: "Lipitor 20 mg is out of stock", patient_flags: [], concurrent_meds: [] } },
+    { en: "Concor 5 short, patient has asthma", ar: "كونكور ٥ ناقص والمريض عنده ربو", q: { text: "Concor 5 mg is short and the patient has asthma", patient_flags: ["bronchial asthma"], concurrent_meds: [] } },
+    { en: "Risek out, patient on Plavix", ar: "ريزك ناقص والمريض بياخد بلافيكس", q: { text: "Risek is out and the patient takes Plavix", patient_flags: [], concurrent_meds: ["Clopidogrel"] } },
+    { en: "Marevan 5 mg is short", ar: "ماريفان ٥ مجم ناقص", q: { text: "Marevan 5 mg is short", patient_flags: [], concurrent_meds: [] } },
+    { en: "Lipitor 20 out of stock", ar: "ليبيتور ٢٠ مش متوفر", q: { text: "Lipitor 20 mg is out of stock", patient_flags: [], concurrent_meds: [] } },
   ],
   synthetic: [
-    { label: "Cardex 10, patient has asthma", q: { text: "Cardex 10 mg is short and the patient has asthma", patient_flags: ["bronchial asthma"], concurrent_meds: [] } },
-    { label: "Gastrolux out, on Clopidex", q: { text: "Gastrolux is out and the patient takes Clopidex", patient_flags: [], concurrent_meds: ["Clopidogrex"] } },
-    { label: "Coagulex 5 mg is short", q: { text: "Coagulex 5 mg is short", patient_flags: [], concurrent_meds: [] } },
-    { label: "Atorex 20 out of stock", q: { text: "Atorex 20 mg is out of stock", patient_flags: [], concurrent_meds: [] } },
+    { en: "Cardex 10, patient has asthma", ar: "كاردكس ١٠ والمريض عنده ربو", q: { text: "Cardex 10 mg is short and the patient has asthma", patient_flags: ["bronchial asthma"], concurrent_meds: [] } },
+    { en: "Gastrolux out, on Clopidex", ar: "جاسترولكس ناقص وبياخد كلوبيدكس", q: { text: "Gastrolux is out and the patient takes Clopidex", patient_flags: [], concurrent_meds: ["Clopidogrex"] } },
+    { en: "Coagulex 5 mg is short", ar: "كواجولكس ٥ مجم ناقص", q: { text: "Coagulex 5 mg is short", patient_flags: [], concurrent_meds: [] } },
+    { en: "Atorex 20 out of stock", ar: "أتوركس ٢٠ مش متوفر", q: { text: "Atorex 20 mg is out of stock", patient_flags: [], concurrent_meds: [] } },
   ],
 };
 
@@ -70,28 +72,29 @@ function EmptyState({
   onExample,
   loading,
 }: {
-  examples: { label: string; q: Query }[];
+  examples: Example[];
   onExample: (q: Query) => void;
   loading: boolean;
 }) {
+  const { t, lang } = useLang();
   return (
     <div
       className="mt-10 border border-dashed p-8 text-center"
       style={{ borderColor: "var(--color-rule)" }}
     >
       <p className="text-sm" style={{ color: "var(--color-ink-muted)" }}>
-        Enter a shortage above, or start from a common case:
+        {t("empty.hint")}
       </p>
       <div className="mt-4 flex flex-wrap justify-center gap-2">
         {examples.map((ex) => (
           <button
-            key={ex.label}
+            key={ex.en}
             disabled={loading}
             onClick={() => onExample(ex.q)}
             className="border px-3 py-1.5 text-xs transition-colors hover:border-[var(--color-ink)] disabled:opacity-40"
             style={{ borderColor: "var(--color-rule)", color: "var(--color-ink)" }}
           >
-            {ex.label}
+            {lang === "ar" ? ex.ar : ex.en}
           </button>
         ))}
       </div>
@@ -100,6 +103,7 @@ function EmptyState({
 }
 
 function Result({ answer }: { answer: SubstitutionAnswer }) {
+  const { t } = useLang();
   const v = verdict(answer);
   const color = toneColor[v.tone];
   const q = answer.query;
@@ -120,7 +124,7 @@ function Result({ answer }: { answer: SubstitutionAnswer }) {
             className="text-3xl font-semibold leading-none tracking-tight sm:text-[2.6rem]"
             style={{ color }}
           >
-            {v.text}
+            {t(v.key)}
           </h2>
           {q.resolved_brand && (
             <div className="mono mt-2 text-sm" style={{ color: "var(--color-ink-muted)" }}>
@@ -150,7 +154,7 @@ function Result({ answer }: { answer: SubstitutionAnswer }) {
               className="flex items-center justify-center border border-dashed py-10 text-sm"
               style={{ borderColor: "var(--color-rule)", color: "var(--color-ink-muted)" }}
             >
-              No substitute offered — see the safety panel and reasoning.
+              {t("result.nosub")}
             </div>
           )}
           <BlockedList blocked={answer.blocked_candidates} />
@@ -162,10 +166,10 @@ function Result({ answer }: { answer: SubstitutionAnswer }) {
       <AuditTrail trace={answer.trace} />
 
       <div className="mono mt-6 flex flex-wrap gap-x-4 gap-y-1 text-[10px]" style={{ color: "var(--color-ink-muted)" }}>
-        <span>model: {answer.model_used}</span>
-        <span>guard trips: {answer.guard_trips}</span>
-        <span>latency: {answer.latency_ms} ms</span>
-        <span>resolution: {answer.query.resolution_score.toFixed(0)}</span>
+        <span>{t("meta.model")}: {answer.model_used}</span>
+        <span>{t("meta.trips")}: {answer.guard_trips}</span>
+        <span>{t("meta.latency")}: {answer.latency_ms} ms</span>
+        <span>{t("meta.resolution")}: {answer.query.resolution_score.toFixed(0)}</span>
       </div>
     </div>
   );

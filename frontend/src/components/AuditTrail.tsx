@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { TraceStep } from "../types";
+import { useLang } from "../LangContext";
 
 // "Show reasoning" — replays the deterministic algorithm step by step, so the
 // pharmacist can check the tool's working. Collapsed by default.
@@ -12,6 +13,7 @@ const STATUS: Record<TraceStep["status"], { color: string; glyph: string }> = {
 };
 
 export function AuditTrail({ trace }: { trace: TraceStep[] }) {
+  const { t } = useLang();
   const [open, setOpen] = useState(false);
   if (trace.length === 0) return null;
 
@@ -22,11 +24,11 @@ export function AuditTrail({ trace }: { trace: TraceStep[] }) {
         className="label flex items-center gap-1.5 transition-colors hover:text-[var(--color-ink)]"
       >
         <span className="mono inline-block w-2">{open ? "▾" : "▸"}</span>
-        Show reasoning — {trace.length} deterministic steps
+        {t("audit.toggle")} — {trace.length} {t("audit.steps")}
       </button>
 
       {open && (
-        <ol className="relative mt-4 pl-1">
+        <ol className="relative mt-4 ps-1">
           {trace.map((s, i) => {
             const st = STATUS[s.status];
             const last = i === trace.length - 1;
@@ -38,7 +40,7 @@ export function AuditTrail({ trace }: { trace: TraceStep[] }) {
               >
                 {!last && (
                   <span
-                    className="absolute left-[11px] top-6 h-full w-px"
+                    className="absolute start-[11px] top-6 h-full w-px"
                     style={{ background: "var(--color-rule)" }}
                   />
                 )}

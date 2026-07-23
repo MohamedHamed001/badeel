@@ -1,32 +1,30 @@
 import type { SubstitutionAnswer, Tier, TierStat } from "../types";
 import { toneColor } from "../verdict";
+import { useLang } from "../LangContext";
+import { tierLabel } from "../i18n";
 
 // The signature element (spec section 10). A vertical rail with four stops.
 // Each stop shows how many candidates were generated and how many survived the
 // safety filter; blocked tiers are struck through with the blocking reason in
 // small caps. Resolves top to bottom as the answer arrives.
 
-const TIERS: { tier: Tier; label: string }[] = [
-  { tier: "generic", label: "Generic" },
-  { tier: "class", label: "Same class" },
-  { tier: "therapeutic", label: "Therapeutic" },
-  { tier: "none", label: "Escalate" },
-];
+const TIERS: Tier[] = ["generic", "class", "therapeutic", "none"];
 
 export function TierRail({ answer }: { answer: SubstitutionAnswer }) {
+  const { t, lang } = useLang();
   const byTier = new Map<Tier, TierStat>(
-    answer.tier_summary.map((t) => [t.tier, t]),
+    answer.tier_summary.map((s) => [s.tier, s]),
   );
   const winning = answer.tier;
 
   return (
     <div className="select-none">
-      <div className="label mb-3">Tier rail</div>
+      <div className="label mb-3">{t("rail.title")}</div>
       <ol className="relative">
-        {TIERS.map((row, i) => {
-          const stat = byTier.get(row.tier);
-          const isNone = row.tier === "none";
-          const active = winning === row.tier;
+        {TIERS.map((tier, i) => {
+          const stat = byTier.get(tier);
+          const isNone = tier === "none";
+          const active = winning === tier;
           const generated = stat?.generated ?? 0;
           const survived = stat?.survived ?? 0;
           const blocked = !isNone && generated > 0 && survived === 0;
@@ -43,20 +41,20 @@ export function TierRail({ answer }: { answer: SubstitutionAnswer }) {
 
           return (
             <li
-              key={row.tier}
-              className="rail-stop relative flex gap-3 pb-5 pl-6"
+              key={tier}
+              className="rail-stop relative flex gap-3 pb-5 ps-6"
               style={{ animationDelay: `${i * 90}ms` }}
             >
               {/* connector line */}
               {i < TIERS.length - 1 && (
                 <span
-                  className="absolute left-[5px] top-3 h-full w-px"
+                  className="absolute start-[5px] top-3 h-full w-px"
                   style={{ background: "var(--color-rule)" }}
                 />
               )}
               {/* stop dot */}
               <span
-                className="absolute left-0 top-1.5 h-[11px] w-[11px] rounded-full border-2"
+                className="absolute start-0 top-1.5 h-[11px] w-[11px] rounded-full border-2"
                 style={{
                   borderColor: active ? color : "var(--color-rule)",
                   background: active ? color : "var(--color-paper)",
@@ -72,7 +70,7 @@ export function TierRail({ answer }: { answer: SubstitutionAnswer }) {
                       textDecorationColor: "var(--color-ink-muted)",
                     }}
                   >
-                    {row.label}
+                    {tierLabel(lang, tier)}
                   </span>
                   {!isNone && (
                     <span className="mono text-[11px]" style={{ color: "var(--color-ink-muted)" }}>

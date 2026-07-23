@@ -27,6 +27,7 @@ from functools import lru_cache
 
 from .candidates import Candidate
 from .config import INTERACTIONS_CSV, LEAFLETS_DIR
+from .i18n import t
 from .schemas import Citation, SafetyFlag
 
 # Controlled map from a patient flag to keywords we look for in a candidate's
@@ -99,7 +100,8 @@ def load_interactions() -> dict[tuple[str, str], tuple[str, str]]:
 
 # ---- individual checks -------------------------------------------------
 
-def contraindication_flag(ingredient, patient_flags, leaflets) -> SafetyFlag | None:
+def contraindication_flag(ingredient, patient_flags, leaflets,
+                          lang: str = "en") -> SafetyFlag | None:
     text = leaflets.contra_text(ingredient)
     if not text:
         return None
@@ -108,25 +110,24 @@ def contraindication_flag(ingredient, patient_flags, leaflets) -> SafetyFlag | N
             if kw in text:
                 return SafetyFlag(
                     kind="contraindication", severity="major",
-                    message=_contra_message(flag, text),
+                    message=_contra_message(flag, text, lang),
                     evidence=[leaflets.citation(ingredient, "Contraindications", text)])
     return None
 
 
-def _contra_message(flag: str, contra_text: str) -> str:
+def _contra_message(flag: str, contra_text: str, lang: str) -> str:
     """The specific clinical consequence of the contraindication, not just its
     name — this is what a pharmacist needs communicated."""
     low = flag.lower()
     if "pregnan" in low:
-        return ("Contraindicated in pregnancy; discontinue immediately — this is "
-                "an urgent teratogenic risk.")
+        return t(lang, "flag.contra_pregnancy")
     if ("renal" in low or "egfr" in low) and "egfr" in contra_text:
-        return ("Contraindicated in severe renal impairment; contraindicated "
-                "below eGFR 30 mL/min.")
-    return f"Contraindicated in {flag}."
+        return t(lang, "flag.contra_renal")
+    return t(lang, "flag.contra", flag=flag)
 
 
-def interaction_flag(ingredient, concurrent_meds, edges) -> SafetyFlag | None:
+def interaction_flag(ingredient, concurrent_meds, edges,
+                     lang: str = "en") -> SafetyFlag | None:
     worst = None
     for med in concurrent_meds:
         hit = edges.get((ingredient, med))
@@ -134,7 +135,7 @@ def interaction_flag(ingredient, concurrent_meds, edges) -> SafetyFlag | None:
             continue
         severity, effect = hit
         flag = SafetyFlag(kind="interaction", severity=severity,
-                          message=f"Interaction with {med}: {effect}.")
+                          message=t(lang, "flag.interaction", med=med, effect=effect))
         if severity == "major":
             return flag           # a major interaction blocks immediately
         worst = worst or flag     # remember a moderate/minor to attach later
@@ -143,7 +144,7 @@ def interaction_flag(ingredient, concurrent_meds, edges) -> SafetyFlag | None:
 
 # ---- orchestration -----------------------------------------------------
 
-def screen(query, candidates: list[Candidate], reg):
+def screen(query, candidates: list[Candidate], reg, lang: str = "en"):
     """Partition candidates into (survivors, blocked_flags).
 
     Returns survivors (Candidates, with counselling_flags populated) and a list
@@ -158,13 +159,13 @@ def screen(query, candidates: list[Candidate], reg):
         ing = cand.ingredient
 
         # a. contraindication -> BLOCK
-        flag = contraindication_flag(ing, query.patient_flags, leaflets)
+        flag = contraindication_flag(ing, query.patient_flags, leaflets, lang)
         if flag:
             blocked.append((cand, flag))
             continue
 
         # b. interaction (major -> BLOCK, else flag)
-        flag = interaction_flag(ing, query.concurrent_meds, edges)
+        flag = interaction_flag(ing, query.concurrent_meds, edges, lang)
         if flag and flag.severity == "major":
             blocked.append((cand, flag))
             continue
@@ -179,14 +180,11 @@ def screen(query, candidates: list[Candidate], reg):
         if involves_combo and reg.components(ing) != q_components:
             blocked.append((cand, SafetyFlag(
                 kind="combination", severity="major",
-                message="This is a fixed dose combination; a valid substitute "
-                        "must contain both components. Adding or dropping an "
-                        "active ingredient is not an equivalent substitution — "
-                        "refer to the prescriber.")))
+                message=t(lang, "flag.combination"))))
             continue
 
         # c. form: modified-release mismatch
-        f = _form_flag(query, cand, leaflets)
+        f = _form_flag(query, cand, leaflets, lang)
         if f and f.kind == "form" and f.severity == "major":
             blocked.append((cand, f))
             continue
@@ -195,15 +193,13 @@ def screen(query, candidates: list[Candidate], reg):
 
         # f. potency: within-class swap needs dose conversion
         if cand.tier == "class":
-            cand.counselling_flags.append(
-                "Within-class substitution: dose conversion required; strengths "
-                "are not milligram equivalent between these molecules.")
+            cand.counselling_flags.append(t(lang, "flag.potency"))
 
         survivors.append(cand)
     return survivors, blocked
 
 
-def _form_flag(query, cand, leaflets) -> SafetyFlag | None:
+def _form_flag(query, cand, leaflets, lang: str = "en") -> SafetyFlag | None:
     q_mr = bool(_MR.search(query.form or ""))
     c_mr = bool(_MR.search(cand.product["form"]))
     if q_mr == c_mr:
@@ -212,11 +208,7 @@ def _form_flag(query, cand, leaflets) -> SafetyFlag | None:
     non_interchangeable = ("not interchangeable" in note
                            or "prescriber review" in note)
     severity = "major" if (q_mr and non_interchangeable) else "moderate"
-    return SafetyFlag(
-        kind="form", severity=severity,
-        message="This is an extended release product; extended release and "
-                "immediate release forms are not interchangeable and the "
-                "dosing frequency changes.")
+    return SafetyFlag(kind="form", severity=severity, message=t(lang, "flag.form"))
 
 
 # ---- leaflet parsing helpers ------------------------------------------

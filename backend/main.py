@@ -51,7 +51,7 @@ NARRATE = os.getenv("BADEEL_NARRATE", "0") == "1"
 @app.post("/api/substitute", response_model=SubstitutionAnswer)
 def substitute(req: SubstituteRequest) -> SubstitutionAnswer:
     return answer(req.text, req.patient_flags, req.concurrent_meds,
-                  get_registry(), narrate=NARRATE)
+                  get_registry(), narrate=NARRATE, lang=req.lang)
 
 
 @app.get("/api/registry/products")

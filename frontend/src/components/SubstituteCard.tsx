@@ -1,13 +1,9 @@
 import type { Substitute } from "../types";
-
-const TIER_LABEL: Record<string, string> = {
-  generic: "Generic",
-  class: "Same class",
-  therapeutic: "Therapeutic",
-  none: "—",
-};
+import { useLang } from "../LangContext";
+import { tierLabel } from "../i18n";
 
 export function SubstituteCard({ sub, rank }: { sub: Substitute; rank: number }) {
+  const { lang } = useLang();
   const delta = sub.price_delta_pct;
   const deltaStr = `${delta > 0 ? "+" : ""}${delta.toFixed(0)}%`;
 
@@ -26,7 +22,7 @@ export function SubstituteCard({ sub, rank }: { sub: Substitute; rank: number })
             {sub.ingredient}
           </span>
         </div>
-        <span className="label">{TIER_LABEL[sub.tier]}</span>
+        <span className="label">{tierLabel(lang, sub.tier)}</span>
       </div>
 
       <div className="mono mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs" style={{ color: "var(--color-ink)" }}>

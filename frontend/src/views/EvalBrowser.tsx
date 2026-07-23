@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import type { EvalCase } from "../types";
 import { api } from "../api";
+import { useLang } from "../LangContext";
 
 // Table of the 30 cases with trap label. Clicking one loads it into the console.
 export function EvalBrowser({ onLoad }: { onLoad: (c: EvalCase) => void }) {
+  const { t } = useLang();
   const [cases, setCases] = useState<EvalCase[]>([]);
   const [error, setError] = useState<string | null>(null);
 
@@ -13,16 +15,16 @@ export function EvalBrowser({ onLoad }: { onLoad: (c: EvalCase) => void }) {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8">
-      <div className="label mb-3">Adversarial eval — 30 labelled cases</div>
+      <div className="label mb-3">{t("eval.title")}</div>
       {error && <p className="text-sm" style={{ color: "var(--color-stop)" }}>{error}</p>}
       <div className="overflow-x-auto border" style={{ borderColor: "var(--color-rule)" }}>
         <table className="w-full text-sm">
           <thead>
-            <tr className="label border-b text-left" style={{ borderColor: "var(--color-rule)" }}>
-              <th className="px-3 py-2 font-medium">ID</th>
-              <th className="px-3 py-2 font-medium">Trap</th>
-              <th className="px-3 py-2 font-medium">Query</th>
-              <th className="px-3 py-2 font-medium">Expected</th>
+            <tr className="label border-b text-start" style={{ borderColor: "var(--color-rule)" }}>
+              <th className="px-3 py-2 font-medium">{t("eval.id")}</th>
+              <th className="px-3 py-2 font-medium">{t("eval.trap")}</th>
+              <th className="px-3 py-2 font-medium">{t("eval.query")}</th>
+              <th className="px-3 py-2 font-medium">{t("eval.expected")}</th>
               <th className="px-3 py-2" />
             </tr>
           </thead>
@@ -45,16 +47,16 @@ export function EvalBrowser({ onLoad }: { onLoad: (c: EvalCase) => void }) {
                     className="mono text-xs"
                     style={{ color: c.must_escalate ? "var(--color-stop)" : "var(--color-ink)" }}
                   >
-                    {c.must_escalate ? "escalate" : c.expected_tier}
+                    {c.must_escalate ? t("eval.escalate") : c.expected_tier}
                   </span>
                 </td>
-                <td className="px-3 py-2 text-right">
+                <td className="px-3 py-2 text-end">
                   <button
                     onClick={() => onLoad(c)}
                     className="border px-2 py-1 text-xs"
                     style={{ borderColor: "var(--color-rule)" }}
                   >
-                    Run →
+                    {t("eval.run")}
                   </button>
                 </td>
               </tr>

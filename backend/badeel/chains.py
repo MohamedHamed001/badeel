@@ -38,9 +38,15 @@ def extract_fields(llm, query: str) -> dict:
         return {}
 
 
+_ARABIC = ("\n\nWrite the \"rationale\" and every \"counselling_flags\" entry in "
+           "ARABIC (Modern Standard Arabic suitable for a pharmacist). Keep the "
+           "JSON keys and the \"ingredient\" value in English exactly as given; "
+           "only the human-readable text is Arabic.")
+
+
 def narrate_substitute(llm, *, brand, ingredient, queried_brand, tier, flags,
                        evidence, allowed_ingredients, forbidden_named, meta,
-                       brand_only=False):
+                       brand_only=False, lang="en"):
     """Write a grounded rationale for one already-chosen substitute, through the
     validator guard. Returns (GuardedSuggestion | None, trips)."""
     ev_text = "\n".join(
@@ -60,6 +66,8 @@ def narrate_substitute(llm, *, brand, ingredient, queried_brand, tier, flags,
                    "dose combination' and note that it provides both components "
                    "of the original product, rather than listing them. "
                    f'The JSON "ingredient" field must still be exactly "{ingredient}".')
+    if lang == "ar":
+        prompt += _ARABIC
     return run_guarded(
         llm, [("user", prompt)],
         allowed_ingredients=allowed_ingredients,
@@ -68,7 +76,7 @@ def narrate_substitute(llm, *, brand, ingredient, queried_brand, tier, flags,
 
 
 def narrate_refusal(llm, *, brand, reason_kind, reason, evidence,
-                    forbidden_named):
+                    forbidden_named, lang="en"):
     """Write a grounded refusal rationale for an escalation, naming no drug.
 
     Returns (rationale, counselling_flags). Falls back to the deterministic
@@ -82,6 +90,8 @@ def narrate_refusal(llm, *, brand, reason_kind, reason, evidence,
               .replace("{reason_kind}", reason_kind)
               .replace("{reason}", reason)
               .replace("{evidence}", ev_text))
+    if lang == "ar":
+        prompt += _ARABIC
 
     for _ in range(_LEAK_RETRY + 1):
         try:

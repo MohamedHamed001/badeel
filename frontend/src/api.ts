@@ -16,6 +16,7 @@ export interface SubstituteRequest {
   text: string;
   patient_flags?: string[];
   concurrent_meds?: string[];
+  lang?: "en" | "ar";
 }
 
 export const api = {

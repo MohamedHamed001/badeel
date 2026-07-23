@@ -1,4 +1,5 @@
 import type { SafetyFlag } from "../types";
+import { useLang } from "../LangContext";
 
 const SEVERITY_TONE: Record<string, string> = {
   major: "var(--color-stop)",
@@ -7,15 +8,16 @@ const SEVERITY_TONE: Record<string, string> = {
 };
 
 export function SafetyPanel({ flags }: { flags: SafetyFlag[] }) {
+  const { t } = useLang();
   if (flags.length === 0) return null;
   return (
     <div>
-      <div className="label mb-2">Safety</div>
+      <div className="label mb-2">{t("safety.title")}</div>
       <ul className="space-y-3">
         {flags.map((f, i) => (
           <li
             key={i}
-            className="border-l-2 pl-3"
+            className="border-s-2 ps-3"
             style={{ borderColor: SEVERITY_TONE[f.severity] }}
           >
             <div className="flex items-baseline gap-2">

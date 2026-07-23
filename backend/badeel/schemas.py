@@ -18,6 +18,7 @@ class SubstituteRequest(BaseModel):
     text: str
     patient_flags: list[str] = Field(default_factory=list)
     concurrent_meds: list[str] = Field(default_factory=list)
+    lang: Literal["en", "ar"] = "en"
 
 
 class DrugQuery(BaseModel):

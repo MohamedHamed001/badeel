@@ -1,8 +1,10 @@
 import { useState } from "react";
 import type { BlockedCandidate } from "../types";
+import { useLang } from "../LangContext";
 
 // "Considered and rejected" — a collapsed disclosure for transparency.
 export function BlockedList({ blocked }: { blocked: BlockedCandidate[] }) {
+  const { t } = useLang();
   const [open, setOpen] = useState(false);
   if (blocked.length === 0) return null;
 
@@ -13,7 +15,7 @@ export function BlockedList({ blocked }: { blocked: BlockedCandidate[] }) {
         className="label flex items-center gap-1.5"
       >
         <span className="mono">{open ? "▾" : "▸"}</span>
-        Considered and rejected ({blocked.length})
+        {t("blocked.title")} ({blocked.length})
       </button>
       {open && (
         <ul className="mt-2 space-y-2">

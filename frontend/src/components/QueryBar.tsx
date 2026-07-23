@@ -1,4 +1,6 @@
 import type { RegistryOptions } from "../types";
+import { useLang } from "../LangContext";
+import { FLAG_AR } from "../i18n";
 
 interface Props {
   options: RegistryOptions | null;
@@ -9,6 +11,7 @@ interface Props {
 }
 
 export function QueryBar({ options, loading, value, onChange, onSubmit }: Props) {
+  const { t, lang } = useLang();
   return (
     <div className="space-y-4">
       <div className="flex gap-2">
@@ -17,7 +20,7 @@ export function QueryBar({ options, loading, value, onChange, onSubmit }: Props)
           value={value.text}
           onChange={(e) => onChange({ ...value, text: e.target.value })}
           onKeyDown={(e) => e.key === "Enter" && !loading && value.text && onSubmit()}
-          placeholder="e.g. Cardex 10 mg is short · كاردكس ١٠ ناقص"
+          placeholder={t("query.placeholder")}
           className="min-w-0 flex-1 border bg-white px-3 py-2.5 text-sm outline-none focus:border-[var(--color-ink)]"
           style={{ borderColor: "var(--color-rule)", fontFamily: "var(--font-arabic)" }}
         />
@@ -27,23 +30,25 @@ export function QueryBar({ options, loading, value, onChange, onSubmit }: Props)
           className="px-5 py-2.5 text-sm font-medium disabled:opacity-40"
           style={{ background: "var(--color-ink)", color: "var(--color-paper)" }}
         >
-          {loading ? "…" : "Analyze"}
+          {loading ? "…" : t("query.analyze")}
         </button>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <ChipGroup
-          label="Patient flags"
+          label={t("query.flags")}
           all={options?.patient_flags ?? []}
           selected={value.patient_flags}
+          display={(f) => (lang === "ar" ? FLAG_AR[f] ?? f : f)}
           onToggle={(f) =>
             onChange({ ...value, patient_flags: toggle(value.patient_flags, f) })
           }
         />
         <ChipGroup
-          label="Concurrent meds"
+          label={t("query.meds")}
           all={options?.ingredients ?? []}
           selected={value.concurrent_meds}
+          display={(m) => m}
           onToggle={(m) =>
             onChange({ ...value, concurrent_meds: toggle(value.concurrent_meds, m) })
           }
@@ -59,12 +64,14 @@ function ChipGroup({
   all,
   selected,
   onToggle,
+  display,
   scroll,
 }: {
   label: string;
   all: string[];
   selected: string[];
   onToggle: (v: string) => void;
+  display: (v: string) => string;
   scroll?: boolean;
 }) {
   return (
@@ -84,7 +91,7 @@ function ChipGroup({
                 color: on ? "var(--color-paper)" : "var(--color-ink-muted)",
               }}
             >
-              {item}
+              {display(item)}
             </button>
           );
         })}

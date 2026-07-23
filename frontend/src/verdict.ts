@@ -1,22 +1,21 @@
 import type { SubstitutionAnswer } from "./types";
+import type { StringKey } from "./i18n";
 
 export type Tone = "clear" | "caution" | "stop" | "neutral";
 
 export interface Verdict {
-  text: string;
+  key: StringKey;
   tone: Tone;
 }
 
 // The verdict line: the largest element on screen, states the outcome plainly.
 export function verdict(a: SubstitutionAnswer): Verdict {
-  if (a.query.unresolved) return { text: "Not in registry", tone: "stop" };
-  if (a.escalate) return { text: "Do not substitute", tone: "stop" };
-  const hasCounselling = a.substitutes.some(
-    (s) => s.counselling_flags.length > 0,
-  );
+  if (a.query.unresolved) return { key: "verdict.unresolved", tone: "stop" };
+  if (a.escalate) return { key: "verdict.stop", tone: "stop" };
+  const hasCounselling = a.substitutes.some((s) => s.counselling_flags.length > 0);
   return hasCounselling
-    ? { text: "Permitted with counselling", tone: "caution" }
-    : { text: "Substitution permitted", tone: "clear" };
+    ? { key: "verdict.caution", tone: "caution" }
+    : { key: "verdict.clear", tone: "clear" };
 }
 
 export const toneColor: Record<Tone, string> = {
