@@ -24,6 +24,11 @@ LEAFLETS_DIR = DATA / "leaflets"
 CHROMA_DIR = ROOT / ("chroma_real" if _REAL else "chroma")
 EVAL_REPORT = ROOT / "eval_report.json"
 
+# The evaluation is defined on the synthetic dataset only (its ground truth is
+# true by construction). The eval routes read it regardless of the active
+# dataset, so the Eval browser works even in real-drug demo mode.
+EVAL_SET = ROOT / "data" / "eval_set.jsonl"
+
 # LLM identity for /api/health, read from the environment (see .env.example).
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama")
 LLM_MODEL = os.getenv("LLM_MODEL", "qwen2.5:7b-instruct")

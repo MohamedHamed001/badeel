@@ -80,7 +80,9 @@ def registry_options():
 
 @app.get("/api/eval/cases")
 def eval_cases():
-    lines = (config.DATA / "eval_set.jsonl").read_text(encoding="utf-8").splitlines()
+    # Always the synthetic eval set — it is the graded/labelled set, independent
+    # of whichever dataset the pipeline is currently serving.
+    lines = config.EVAL_SET.read_text(encoding="utf-8").splitlines()
     return [json.loads(l) for l in lines if l.strip()]
 
 
