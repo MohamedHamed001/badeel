@@ -22,6 +22,7 @@ export default function App() {
   const [query, setQuery] = useState<Query>(EMPTY);
   const [answer, setAnswer] = useState<SubstitutionAnswer | null>(null);
   const [streamText, setStreamText] = useState("");
+  const [narrating, setNarrating] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const lastRun = useRef<Query | null>(null);
@@ -43,6 +44,7 @@ export default function App() {
     setLoading(true);
     setError(null);
     setStreamText("");
+    setNarrating(false);
     await substituteStream(
       { ...q, lang: l },
       {
@@ -50,11 +52,13 @@ export default function App() {
           setAnswer(a);
           setLoading(false); // deterministic result is ready; prose streams next
         },
+        onNarrating: () => setNarrating(true),
         onDelta: (i, text) => {
           if (i === 0) setStreamText((t) => t + text);
         },
         onDone: (i, d) => {
           setStreamText("");
+          setNarrating(false);
           setAnswer((prev) =>
             prev
               ? {
@@ -73,10 +77,12 @@ export default function App() {
           setError(`Request failed: ${e}`);
           setAnswer(null);
           setLoading(false);
+          setNarrating(false);
         },
       },
     );
     setLoading(false);
+    setNarrating(false);
   }
 
   function setLang(l: Lang) {
@@ -115,6 +121,7 @@ export default function App() {
               }}
               answer={answer}
               streamText={streamText}
+              narrating={narrating}
               loading={loading}
               error={error}
             />

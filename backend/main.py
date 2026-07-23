@@ -27,6 +27,14 @@ from badeel.schemas import SubstitutionAnswer, SubstituteRequest
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     get_registry()   # load CSVs once at boot, not on first request
+    if os.getenv("BADEEL_NARRATE", "0") == "1":
+        # Warm the embedding/vector stack at startup so the FIRST narration
+        # request doesn't pay the torch cold-start (several seconds).
+        try:
+            from badeel.retrieval import get_retriever
+            get_retriever()
+        except Exception:
+            pass
     yield
 
 
@@ -79,6 +87,9 @@ def substitute_stream(req: SubstituteRequest):
 
         sub = ans.substitutes[0]
         q = ans.query
+        # tell the client prose is coming, so it can show a 'generating'
+        # indicator during the model's (silent) reasoning gap
+        yield _sse("narrating", {"i": 0})
         try:
             from badeel.chains import stream_rationale
             from badeel.llm import get_llm
@@ -119,7 +130,10 @@ def substitute_stream(req: SubstituteRequest):
             yield _sse("done", {"i": 0, "rationale": "", "error": True})
         yield _sse("end", {})
 
-    return StreamingResponse(gen(), media_type="text/event-stream")
+    return StreamingResponse(
+        gen(), media_type="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no",
+                 "Connection": "keep-alive"})
 
 
 @app.get("/api/registry/products")

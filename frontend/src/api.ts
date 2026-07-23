@@ -21,6 +21,7 @@ export interface SubstituteRequest {
 
 export interface StreamHandlers {
   onAnswer: (a: SubstitutionAnswer) => void;
+  onNarrating: (i: number) => void;
   onDelta: (i: number, text: string) => void;
   onDone: (i: number, d: { rationale: string; evidence?: unknown[]; guard_trip?: boolean }) => void;
   onError: (e: string) => void;
@@ -64,6 +65,7 @@ export async function substituteStream(body: SubstituteRequest, h: StreamHandler
       if (!data) continue;
       const parsed = JSON.parse(data);
       if (event === "answer") h.onAnswer(parsed as SubstitutionAnswer);
+      else if (event === "narrating") h.onNarrating(parsed.i);
       else if (event === "delta") h.onDelta(parsed.i, parsed.text);
       else if (event === "done") h.onDone(parsed.i, parsed);
     }

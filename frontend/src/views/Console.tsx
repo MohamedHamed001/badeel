@@ -20,6 +20,7 @@ interface Props {
   onExample: (q: Query) => void;
   answer: SubstitutionAnswer | null;
   streamText: string;
+  narrating: boolean;
   loading: boolean;
   error: string | null;
 }
@@ -63,7 +64,9 @@ export function Console(props: Props) {
         <EmptyState examples={examples} onExample={props.onExample} loading={loading} />
       )}
 
-      {answer && <Result answer={answer} streamText={props.streamText} />}
+      {answer && (
+        <Result answer={answer} streamText={props.streamText} narrating={props.narrating} />
+      )}
     </div>
   );
 }
@@ -103,7 +106,15 @@ function EmptyState({
   );
 }
 
-function Result({ answer, streamText }: { answer: SubstitutionAnswer; streamText: string }) {
+function Result({
+  answer,
+  streamText,
+  narrating,
+}: {
+  answer: SubstitutionAnswer;
+  streamText: string;
+  narrating: boolean;
+}) {
   const { t } = useLang();
   const v = verdict(answer);
   const color = toneColor[v.tone];
@@ -153,6 +164,7 @@ function Result({ answer, streamText }: { answer: SubstitutionAnswer; streamText
                 sub={s}
                 rank={i + 1}
                 streamText={i === 0 ? streamText : ""}
+                narrating={i === 0 && narrating}
               />
             ))
           ) : (
