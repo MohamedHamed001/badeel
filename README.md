@@ -20,7 +20,7 @@ outside the retrieved candidate set. The model only writes prose.
 | 0b | Naive baseline reproduced and recorded | ✅ done |
 | 1  | Registry + alias/fuzzy resolution | ✅ done |
 | 2  | Candidates + safety filter (no LLM) | ✅ done — safety **100%** |
-| 3  | FastAPI skeleton | ⏳ |
+| 3  | FastAPI skeleton (all §7 routes) | ✅ done — 36 tests green |
 | 4  | Retrieval + chains + validator guard | ⏳ |
 | 5  | Frontend | ⏳ |
 | 6  | Reranker, model comparison, deploy | ⏳ |
@@ -69,5 +69,15 @@ uv pip install -r backend/requirements.txt
 python scripts/baseline.py            # writes predictions.baseline.jsonl
 python score.py predictions.baseline.jsonl
 
-pytest backend/tests -q
+cd backend && python -m pytest -q    # 36 tests
+uvicorn main:app --reload            # API on :8000, docs at /docs
+```
+
+Health check once running:
+
+```bash
+curl -s localhost:8000/api/health
+curl -s -X POST localhost:8000/api/substitute \
+  -H 'Content-Type: application/json' \
+  -d '{"text":"Cardex 10 mg is short","patient_flags":["bronchial asthma"]}'
 ```

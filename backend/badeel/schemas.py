@@ -12,6 +12,14 @@ Tier = Literal["generic", "class", "therapeutic", "none"]
 Severity = Literal["minor", "moderate", "major"]
 
 
+class SubstituteRequest(BaseModel):
+    """Body of POST /api/substitute. patient_flags and concurrent_meds, when
+    given, override anything the pipeline would infer from `text`."""
+    text: str
+    patient_flags: list[str] = Field(default_factory=list)
+    concurrent_meds: list[str] = Field(default_factory=list)
+
+
 class DrugQuery(BaseModel):
     raw_text: str
     resolved_brand: str | None = None
