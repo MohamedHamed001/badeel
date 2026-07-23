@@ -44,3 +44,43 @@ safety filter, NTI gate and escalation, the system is either unsafe (LLM) or
 unhelpful (naive). We report both honestly rather than reverse-engineer the
 original ungrounded baseline's undocumented prompt. Per the dataset card, "a
 negative result honestly reported beats a fabricated positive one."
+
+## 4. Contraindication data comes from the leaflets, not a CSV
+
+`build_dataset.py` exports only a subset of the ingredient fields to
+`ingredients.csv` — there is no contraindication column. Rather than modify the
+frozen dataset (spec §1), the safety filter parses the `## Contraindications`
+section of each leaflet markdown. This keeps `data/` the single source of
+truth and gives `Citation` evidence for free. Patient flags map to
+contraindication text through a small explicit keyword table in `safety.py`
+(the six flags the eval uses); clinical keyword matching is kept deliberately
+literal, never "clever".
+
+## 5. Interaction blocking is severity-driven
+
+`major` interactions block a candidate; `moderate`/`minor` only attach a
+counselling flag. This is what makes E008 (Omeprazine × Clopidogrex, major)
+drop the tier-1 generic so a tier-2 Pantoprazine wins, while E027 (Levothyral ×
+Omeprazine, moderate) still allows the PPI with a flag.
+
+## 6. Two rules the eval forced, both safe and defensible
+
+- **Resolve the earliest-mentioned brand.** "Profex is out, can I give
+  Panadex?" names the out-of-stock drug first and the proposed alternative
+  second. Longest-substring matching grabbed the wrong one (Panadex), leaking a
+  forbidden ingredient. Resolving by earliest position (then longest at that
+  position) fixes E013 and E029 and still keeps "Cardex Plus" over "Cardex".
+- **A therapeutic (cross-class) swap is only offered when a closer
+  generic/class option existed but was safety-blocked** (e.g. penicillin
+  allergy forces a macrolide, E009). If no generic/class candidate ever existed,
+  the drug is genuinely unsubstitutable and we escalate rather than cross drug
+  classes — an antiplatelet must never silently become an anticoagulant (E004,
+  E023).
+
+## 7. The deterministic narration stub emits no prose
+
+In `--no-llm` mode the prediction's `response_text` is empty. `score.py` counts
+a forbidden ingredient appearing in the response text as a leak, so a stub that
+named blocked or queried ingredients would fail cases it actually handled
+correctly. Suggestions are carried structurally in `suggested_ingredients`;
+prose arrives with the guarded LLM in phase 4.

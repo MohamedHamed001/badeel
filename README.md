@@ -19,7 +19,7 @@ outside the retrieved candidate set. The model only writes prose.
 | 0  | Dataset (26 ingredients, 64 products, 26 leaflets, 30 eval cases) | ✅ done |
 | 0b | Naive baseline reproduced and recorded | ✅ done |
 | 1  | Registry + alias/fuzzy resolution | ✅ done |
-| 2  | Candidates + safety filter (no LLM) | ⏳ |
+| 2  | Candidates + safety filter (no LLM) | ✅ done — safety **100%** |
 | 3  | FastAPI skeleton | ⏳ |
 | 4  | Retrieval + chains + validator guard | ⏳ |
 | 5  | Frontend | ⏳ |
@@ -27,13 +27,25 @@ outside the retrieved candidate set. The model only writes prose.
 
 ## Results
 
-| System | correct | safe |
-|---|---|---|
-| Ungrounded-LLM floor (spec §1) | 3.3% | 26.7% |
-| Deterministic naive baseline (`scripts/baseline.py`) | 0.0% | 83.3% |
-| Badeel (target, phase 4) | ≥ 60% | ≥ 90% |
+| System | correct | safe | tier | escalation |
+|---|---|---|---|---|
+| Ungrounded-LLM floor (spec §1) | 3.3% | 26.7% | — | — |
+| Deterministic naive baseline (`scripts/baseline.py`) | 0.0% | 83.3% | 23% | 43% |
+| **Phase 2 deterministic pipeline (no LLM)** | 6.7% | **100%** | 70% | 80% |
+| Badeel (target, phase 4 with narration) | ≥ 60% | ≥ 90% | — | — |
 
-See [DECISIONS.md](DECISIONS.md) for why the two baseline rows differ.
+The Phase 2 pipeline is deterministic and does no narration, so `correct` and
+the `must_flag` clinical phrases stay low until the LLM lands in phase 4 — but
+**safety is already 100%**: it never suggests a forbidden ingredient. That is
+the whole argument of the project: the deterministic layer carries safety, the
+model only writes prose. See [DECISIONS.md](DECISIONS.md).
+
+Reproduce:
+
+```bash
+python backend/scripts/run_eval.py --no-llm   # writes predictions.jsonl
+python score.py predictions.jsonl
+```
 
 ## Layout
 

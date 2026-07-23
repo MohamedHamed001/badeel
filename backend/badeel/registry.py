@@ -30,6 +30,7 @@ class Registry:
     def __init__(self, products, ingredients, aliases):
         self.products = products                     # list[dict]
         self.ingredients = {i["ingredient_id"]: i for i in ingredients}
+        self.ing_by_name = {i["name"]: i for i in ingredients}
 
         # First SKU seen per brand is enough for brand-level identity.
         self.by_brand: dict[str, dict] = {}
@@ -65,6 +66,24 @@ class Registry:
             aliases=_read_csv(ALIASES_CSV),
         )
 
+    # ---- metadata accessors ------------------------------------------
+
+    def is_combination(self, ingredient: str) -> bool:
+        row = self.ing_by_name.get(ingredient)
+        return bool(row and row.get("is_combination") == "1")
+
+    def components(self, ingredient: str) -> frozenset[str]:
+        """Active-ingredient component set. A single-molecule drug's set is
+        just itself; a fixed-dose combination's is its declared components."""
+        row = self.ing_by_name.get(ingredient)
+        if row and row.get("components"):
+            return frozenset(row["components"].split("|"))
+        return frozenset({ingredient})
+
+    def is_nti(self, ingredient: str) -> bool:
+        row = self.ing_by_name.get(ingredient)
+        return bool(row and row.get("nti") == "1")
+
     # ---- resolution ---------------------------------------------------
 
     def resolve(self, text: str) -> DrugQuery:
@@ -92,15 +111,18 @@ class Registry:
         # 2. exact brand
         if low in self._brand_lower:
             return self._brand_lower[low], 100.0
-        # 3. substring scan over all surface forms + alias keys, longest wins.
-        #    A whole-string query already fell through 1/2, so this catches
-        #    brands embedded in a sentence ("No Atorex 20 mg anywhere").
-        candidates = {**self._surface_lower,
-                      **{a: b for a, b in self.alias_map.items()}}
-        hits = [(surface, brand) for surface, brand in candidates.items()
+        # 3. substring scan over all surface forms + alias keys. The queried
+        #    (out-of-stock) drug is the one mentioned FIRST; a proposed
+        #    alternative ("...can I give Panadex?") comes later. So resolve by
+        #    earliest position, then longest surface at that position. This is
+        #    what keeps "Valtec 160 is out, can I give Valtec Plus" on Valtec,
+        #    and "Cardex Plus is out" on the longer Cardex Plus.
+        candidates = {**self._surface_lower, **self.alias_map}
+        hits = [(low.find(surface), -len(surface), brand)
+                for surface, brand in candidates.items()
                 if _contains_word(low, surface)]
         if hits:
-            surface, brand = max(hits, key=lambda sb: len(sb[0]))
+            _, _, brand = min(hits)
             return brand, 100.0
         # 4. fuzzy over surface forms only (brands + Arabic names).
         match = process.extractOne(
