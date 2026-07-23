@@ -19,3 +19,6 @@ frontend/dist/
 
 # secrets — never commit
 .env
+
+# excluded from the repo per request (kept locally)
+DECISIONS.md

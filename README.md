@@ -34,9 +34,6 @@ The drug universe is **fully synthetic** (fictional brands and ingredients with
 realistic ATC-code structure), so the ground truth is true by construction and the
 30-case evaluation set can be deliberately adversarial. Not for clinical use.
 
-> For engineering detail, architecture and design tradeoffs, see
-> [README_DEV.md](README_DEV.md) and [DECISIONS.md](DECISIONS.md).
-
 ---
 
 # ✨ Features
