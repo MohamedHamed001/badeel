@@ -7,7 +7,7 @@ venv/
 
 # Eval outputs (regenerated)
 eval_report.json
-predictions.jsonl
+predictions*.jsonl
 logs/
 
 # Node

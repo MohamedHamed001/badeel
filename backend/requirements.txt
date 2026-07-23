@@ -1,0 +1,16 @@
+fastapi
+uvicorn[standard]
+langchain>=0.3
+langchain-core
+langchain-community
+langchain-ollama
+langchain-openai
+langchain-huggingface
+chromadb
+sentence-transformers
+rank-bm25
+rapidfuzz
+pydantic>=2.7
+pandas
+pytest
+httpx
