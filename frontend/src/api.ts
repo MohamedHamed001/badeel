@@ -23,7 +23,7 @@ export interface StreamHandlers {
   onAnswer: (a: SubstitutionAnswer) => void;
   onNarrating: (i: number) => void;
   onDelta: (i: number, text: string) => void;
-  onDone: (i: number, d: { rationale: string; evidence?: unknown[]; guard_trip?: boolean }) => void;
+  onDone: (i: number, d: { rationale: string; evidence?: unknown[]; guard_trip?: boolean; model?: string; latency_ms?: number }) => void;
   onError: (e: string) => void;
 }
 

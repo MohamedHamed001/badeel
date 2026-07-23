@@ -67,6 +67,8 @@ export default function App() {
           reveal({
             ...pending,
             guard_trips: pending.guard_trips + (d.guard_trip ? 1 : 0),
+            model_used: d.model ?? pending.model_used, // the LLM actually ran
+            latency_ms: d.latency_ms ?? pending.latency_ms,
             substitutes: pending.substitutes.map((s, idx) =>
               idx === i
                 ? { ...s, rationale: d.rationale, evidence: (d.evidence as typeof s.evidence) ?? s.evidence }

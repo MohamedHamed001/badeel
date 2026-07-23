@@ -75,6 +75,8 @@ def substitute_stream(req: SubstituteRequest):
     dropped. Falls back cleanly to a deterministic-only stream if no model is
     reachable or narration is off."""
     reg = get_registry()
+    import time
+    started = time.perf_counter()
 
     def gen():
         ans = answer(req.text, req.patient_flags, req.concurrent_meds, reg,
@@ -114,21 +116,25 @@ def substitute_stream(req: SubstituteRequest):
                 flags=sub.counselling_flags, evidence=evidence, lang=req.lang,
                 brand_only=reg.is_combination(sub.ingredient)))
 
+            model = os.getenv("LLM_MODEL", "unknown")
+            latency = int((time.perf_counter() - started) * 1000)
             low = acc.lower()
             leaked = any(d.lower() in low for d in forbidden)
             if not acc.strip() or leaked:
                 # guard dropped the prose — fall back to a safe deterministic
-                # sentence so the recommendation is never left unexplained
+                # sentence so the recommendation is never left unexplained. The
+                # model still ran, so report it (and the guard trip).
                 from badeel.i18n import t
                 fallback = t(req.lang, f"rationale.fb.{sub.tier}")
-                yield _sse("done", {"i": 0, "rationale": fallback, "guard_trip": True})
+                yield _sse("done", {"i": 0, "rationale": fallback, "guard_trip": True,
+                                    "model": model, "latency_ms": latency})
             else:
                 cites = [Citation(leaflet=c["leaflet"], section=c["section"],
                                   snippet=c["text"][:190]).model_dump()
                          for c in evidence]
                 yield _sse("done", {"i": 0, "rationale": acc.strip(),
                                     "evidence": cites, "guard_trip": False,
-                                    "model": os.getenv("LLM_MODEL", "unknown")})
+                                    "model": model, "latency_ms": latency})
         except Exception:
             yield _sse("done", {"i": 0, "rationale": "", "error": True})
         yield _sse("end", {})
