@@ -2,10 +2,19 @@ import type { Substitute } from "../types";
 import { useLang } from "../LangContext";
 import { tierLabel } from "../i18n";
 
-export function SubstituteCard({ sub, rank }: { sub: Substitute; rank: number }) {
+export function SubstituteCard({
+  sub,
+  rank,
+  streamText = "",
+}: {
+  sub: Substitute;
+  rank: number;
+  streamText?: string;
+}) {
   const { lang } = useLang();
   const delta = sub.price_delta_pct;
   const deltaStr = `${delta > 0 ? "+" : ""}${delta.toFixed(0)}%`;
+  const streaming = streamText.length > 0;
 
   return (
     <div
@@ -36,8 +45,16 @@ export function SubstituteCard({ sub, rank }: { sub: Substitute; rank: number })
         )}
       </div>
 
-      {sub.rationale && (
-        <p className="mt-3 text-sm leading-relaxed">{sub.rationale}</p>
+      {(streaming || sub.rationale) && (
+        <p className="mt-3 text-sm leading-relaxed">
+          {streaming ? streamText : sub.rationale}
+          {streaming && (
+            <span
+              className="ms-0.5 inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse"
+              style={{ background: "var(--color-ink-muted)" }}
+            />
+          )}
+        </p>
       )}
 
       {sub.counselling_flags.length > 0 && (

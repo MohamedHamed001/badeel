@@ -19,6 +19,57 @@ export interface SubstituteRequest {
   lang?: "en" | "ar";
 }
 
+export interface StreamHandlers {
+  onAnswer: (a: SubstitutionAnswer) => void;
+  onDelta: (i: number, text: string) => void;
+  onDone: (i: number, d: { rationale: string; evidence?: unknown[]; guard_trip?: boolean }) => void;
+  onError: (e: string) => void;
+}
+
+// Consume the Server-Sent-Events stream: deterministic `answer` first, then
+// `delta` tokens for the live-typing rationale, then `done`.
+export async function substituteStream(body: SubstituteRequest, h: StreamHandlers) {
+  let res: Response;
+  try {
+    res = await fetch("/api/substitute/stream", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+  } catch (e) {
+    h.onError(String(e));
+    return;
+  }
+  if (!res.ok || !res.body) {
+    h.onError(`${res.status} ${res.statusText}`);
+    return;
+  }
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+    let sep: number;
+    while ((sep = buf.indexOf("\n\n")) >= 0) {
+      const block = buf.slice(0, sep);
+      buf = buf.slice(sep + 2);
+      let event = "message";
+      let data = "";
+      for (const line of block.split("\n")) {
+        if (line.startsWith("event:")) event = line.slice(6).trim();
+        else if (line.startsWith("data:")) data += line.slice(5).trim();
+      }
+      if (!data) continue;
+      const parsed = JSON.parse(data);
+      if (event === "answer") h.onAnswer(parsed as SubstitutionAnswer);
+      else if (event === "delta") h.onDelta(parsed.i, parsed.text);
+      else if (event === "done") h.onDone(parsed.i, parsed);
+    }
+  }
+}
+
 export const api = {
   substitute(body: SubstituteRequest): Promise<SubstitutionAnswer> {
     return fetch("/api/substitute", {

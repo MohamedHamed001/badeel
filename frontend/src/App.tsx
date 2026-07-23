@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { api } from "./api";
+import { api, substituteStream } from "./api";
 import type { EvalCase, Health, RegistryOptions, SubstitutionAnswer } from "./types";
 import type { Lang } from "./i18n";
 import { makeT } from "./i18n";
@@ -21,6 +21,7 @@ export default function App() {
 
   const [query, setQuery] = useState<Query>(EMPTY);
   const [answer, setAnswer] = useState<SubstitutionAnswer | null>(null);
+  const [streamText, setStreamText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const lastRun = useRef<Query | null>(null);
@@ -41,14 +42,41 @@ export default function App() {
     lastRun.current = q;
     setLoading(true);
     setError(null);
-    try {
-      setAnswer(await api.substitute({ ...q, lang: l }));
-    } catch (e) {
-      setError(String(e));
-      setAnswer(null);
-    } finally {
-      setLoading(false);
-    }
+    setStreamText("");
+    await substituteStream(
+      { ...q, lang: l },
+      {
+        onAnswer: (a) => {
+          setAnswer(a);
+          setLoading(false); // deterministic result is ready; prose streams next
+        },
+        onDelta: (i, text) => {
+          if (i === 0) setStreamText((t) => t + text);
+        },
+        onDone: (i, d) => {
+          setStreamText("");
+          setAnswer((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  guard_trips: prev.guard_trips + (d.guard_trip ? 1 : 0),
+                  substitutes: prev.substitutes.map((s, idx) =>
+                    idx === i
+                      ? { ...s, rationale: d.rationale, evidence: (d.evidence as typeof s.evidence) ?? s.evidence }
+                      : s,
+                  ),
+                }
+              : prev,
+          );
+        },
+        onError: (e) => {
+          setError(`Request failed: ${e}`);
+          setAnswer(null);
+          setLoading(false);
+        },
+      },
+    );
+    setLoading(false);
   }
 
   function setLang(l: Lang) {
@@ -86,6 +114,7 @@ export default function App() {
                 run(q);
               }}
               answer={answer}
+              streamText={streamText}
               loading={loading}
               error={error}
             />

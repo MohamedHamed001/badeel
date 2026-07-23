@@ -19,6 +19,7 @@ interface Props {
   onSubmit: () => void;
   onExample: (q: Query) => void;
   answer: SubstitutionAnswer | null;
+  streamText: string;
   loading: boolean;
   error: string | null;
 }
@@ -62,7 +63,7 @@ export function Console(props: Props) {
         <EmptyState examples={examples} onExample={props.onExample} loading={loading} />
       )}
 
-      {answer && <Result answer={answer} />}
+      {answer && <Result answer={answer} streamText={props.streamText} />}
     </div>
   );
 }
@@ -102,7 +103,7 @@ function EmptyState({
   );
 }
 
-function Result({ answer }: { answer: SubstitutionAnswer }) {
+function Result({ answer, streamText }: { answer: SubstitutionAnswer; streamText: string }) {
   const { t } = useLang();
   const v = verdict(answer);
   const color = toneColor[v.tone];
@@ -147,7 +148,12 @@ function Result({ answer }: { answer: SubstitutionAnswer }) {
         <div className="space-y-3">
           {answer.substitutes.length > 0 ? (
             answer.substitutes.map((s, i) => (
-              <SubstituteCard key={i} sub={s} rank={i + 1} />
+              <SubstituteCard
+                key={i}
+                sub={s}
+                rank={i + 1}
+                streamText={i === 0 ? streamText : ""}
+              />
             ))
           ) : (
             <div

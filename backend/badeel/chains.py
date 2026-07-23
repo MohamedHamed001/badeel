@@ -75,6 +75,32 @@ def narrate_substitute(llm, *, brand, ingredient, queried_brand, tier, flags,
         meta=meta)
 
 
+def stream_rationale(llm, *, brand, ingredient, queried_brand, tier, flags,
+                     evidence, lang="en", brand_only=False):
+    """Yield the rationale as plain-text chunks for live streaming. The caller
+    accumulates the text and runs the leak check once the stream completes."""
+    ev_text = "\n".join(
+        f"[{c['leaflet']} / {c['section']}] {c['text'][:300]}" for c in evidence
+    ) or "None."
+    prompt = (_load("rationale_stream.v1.md")
+              .replace("{brand}", brand)
+              .replace("{ingredient}", ingredient)
+              .replace("{queried_brand}", queried_brand or "the queried product")
+              .replace("{tier}", tier)
+              .replace("{flags}", "; ".join(flags) or "none")
+              .replace("{evidence}", ev_text))
+    if brand_only:
+        prompt += (f"\n\nThis is a fixed dose combination: refer to it only as "
+                   f"'{brand}', never write any active-ingredient name.")
+    if lang == "ar":
+        prompt += ("\n\nWrite the sentences in ARABIC (Modern Standard Arabic "
+                   "suitable for a pharmacist).")
+    for chunk in llm.stream([("user", prompt)]):
+        text = getattr(chunk, "content", "")
+        if text:
+            yield text
+
+
 def narrate_refusal(llm, *, brand, reason_kind, reason, evidence,
                     forbidden_named, lang="en"):
     """Write a grounded refusal rationale for an escalation, naming no drug.
