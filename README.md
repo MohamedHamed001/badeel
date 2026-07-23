@@ -195,8 +195,6 @@ model only writes, and the guard keeps the prose grounded.
 
 * **Cross-encoder reranker** (`bge-reranker-base`) on top of hybrid retrieval, with a
   measured with/without comparison.
-* **Multi-model comparison table** (`gpt-oss:20b` → `gemma4:31b` → `gpt-oss:120b`) to
-  show the guard-trip rate falling as model size rises.
 * **Public deployment** on Hugging Face Spaces (single Docker image serving the API
   and the built frontend from one origin) plus the demo video.
 
