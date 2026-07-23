@@ -77,6 +77,16 @@ class TierStat(BaseModel):
     blocked_reason: str | None = None
 
 
+class TraceStep(BaseModel):
+    """One step of the deterministic algorithm, for the audit trail. Additive:
+    a human-readable replay of what the pipeline already did."""
+    step: int
+    name: str
+    status: Literal["ok", "escalate", "block", "info", "skip"]
+    detail: str
+    items: list[str] = Field(default_factory=list)
+
+
 class SubstitutionAnswer(BaseModel):
     query: DrugQuery
     tier: Tier
@@ -86,6 +96,7 @@ class SubstitutionAnswer(BaseModel):
     safety_flags: list[SafetyFlag] = Field(default_factory=list)
     blocked_candidates: list[BlockedCandidate] = Field(default_factory=list)
     tier_summary: list[TierStat] = Field(default_factory=list)
+    trace: list[TraceStep] = Field(default_factory=list)
     confidence: float = 0.0
     guard_trips: int = 0
     latency_ms: int = 0

@@ -64,6 +64,14 @@ export interface TierStat {
   blocked_reason: string | null;
 }
 
+export interface TraceStep {
+  step: number;
+  name: string;
+  status: "ok" | "escalate" | "block" | "info" | "skip";
+  detail: string;
+  items: string[];
+}
+
 export interface SubstitutionAnswer {
   query: DrugQuery;
   tier: Tier;
@@ -73,6 +81,7 @@ export interface SubstitutionAnswer {
   safety_flags: SafetyFlag[];
   blocked_candidates: BlockedCandidate[];
   tier_summary: TierStat[];
+  trace: TraceStep[];
   confidence: number;
   guard_trips: number;
   latency_ms: number;

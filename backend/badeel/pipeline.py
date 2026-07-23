@@ -23,7 +23,7 @@ from . import safety as safety_mod
 from .registry import Registry, get_registry
 from .safety import contraindication_flag, load_leaflets
 from .schemas import (BlockedCandidate, DrugQuery, SafetyFlag, Substitute,
-                      SubstitutionAnswer)
+                      SubstitutionAnswer, TraceStep)
 
 TIER_ORDER = {"generic": 0, "class": 1, "therapeutic": 2, "none": 3}
 
@@ -37,6 +37,7 @@ def answer(text: str,
     reg = reg or get_registry()
     started = time.perf_counter()
     meta = meta or {}
+    trace: list[TraceStep] = []
 
     # 1. RESOLVE
     query = reg.resolve(text)
@@ -47,10 +48,15 @@ def answer(text: str,
         query.concurrent_meds = concurrent_meds
 
     def finish(ans: SubstitutionAnswer) -> SubstitutionAnswer:
+        ans.trace = trace
         ans.latency_ms = int((time.perf_counter() - started) * 1000)
         return ans
 
     if query.unresolved:
+        trace.append(TraceStep(
+            step=1, name="Resolve", status="escalate",
+            detail=f'"{text}" did not match any brand, alias or spelling in the '
+                   f"registry above the confidence threshold."))
         return finish(_escalate(
             query, "Product not found in registry. We cannot advise a "
                    "substitution for an unrecognised product; confirm the name "
@@ -59,9 +65,18 @@ def answer(text: str,
     qprod = reg.by_brand[query.resolved_brand]
     query.strength = qprod["strength"]
     query.form = qprod["form"]
+    trace.append(TraceStep(
+        step=1, name="Resolve", status="ok",
+        detail=f'"{text}" → {query.resolved_brand} · {query.ingredient} · '
+               f'{qprod["strength"]} {qprod["form"]} (match {query.resolution_score:.0f}/100).'))
 
     # 2. NTI GATE — short-circuit everything, even a same-molecule brand switch
     if reg.is_nti(query.ingredient):
+        trace.append(TraceStep(
+            step=2, name="NTI gate", status="escalate",
+            detail=f"{query.ingredient} is a narrow therapeutic index drug — "
+                   f"substitution is short-circuited before any candidate is "
+                   f"generated."))
         splitting = any(w in text.lower() for w in ("halve", "split", "cut", "quarter"))
         reason = ("Narrow therapeutic index drug. Do not substitute without "
                   "prescriber authorisation and appropriate monitoring "
@@ -78,12 +93,28 @@ def answer(text: str,
             _narrate_refusal(ans, query, "narrow therapeutic index", reg, meta)
         return finish(ans)
 
+    trace.append(TraceStep(
+        step=2, name="NTI gate", status="skip",
+        detail=f"{query.ingredient} is not a narrow therapeutic index drug — continue."))
+
     # 3. UPSTREAM — is the original prescription itself contraindicated?
     leaflets = load_leaflets()
     upstream = contraindication_flag(query.ingredient, query.patient_flags, leaflets)
+    if query.patient_flags:
+        trace.append(TraceStep(
+            step=3, name="Upstream check", status="block" if upstream else "ok",
+            detail=(f"The prescribed {query.ingredient} is itself contraindicated "
+                    f"for this patient — its generics are unsafe too."
+                    if upstream else
+                    f"The prescribed {query.ingredient} is not contraindicated for "
+                    f"[{', '.join(query.patient_flags)}].")))
 
     # 4. CANDIDATES
     cands = candidates_mod.generate(query, reg)
+    trace.append(TraceStep(
+        step=4, name="Candidates", status="info",
+        detail=f"Generated {len(cands)} available candidate(s) by tier.",
+        items=[f"{c.brand} ({c.ingredient}) — {c.tier}" for c in cands]))
 
     # 5. SAFETY (after generation, before ranking)
     survivors, blocked = safety_mod.screen(query, cands, reg)
@@ -112,9 +143,19 @@ def answer(text: str,
 
     tier_summary = _tier_summary(cands, survivors, blocked)
 
+    trace.append(TraceStep(
+        step=5, name="Safety filter", status="ok",
+        detail=f"Ran after generation, before ranking: {len(survivors)} survived, "
+               f"{len(blocked)} blocked.",
+        items=[f"{c.brand} ✓ survived" for c in survivors]
+              + [f"{c.brand} ✗ {flag.message}" for c, flag in blocked]))
+
     # 6. DECIDE
     if not survivors:
         reason = _no_survivor_reason(upstream, blocked)
+        trace.append(TraceStep(
+            step=6, name="Decide", status="escalate",
+            detail="No candidate survived the safety filter — escalate to the prescriber."))
         ans = _escalate(query, reason,
                         flags=[upstream] if upstream else [],
                         blocked=blocked_out)
@@ -144,6 +185,16 @@ def answer(text: str,
     best_tier = min(survivors, key=lambda c: TIER_ORDER[c.tier]).tier
     winners = [c for c in survivors if c.tier == best_tier]
     winners.sort(key=lambda c: _rank_key(c, qprod))
+
+    trace.append(TraceStep(
+        step=6, name="Decide", status="ok",
+        detail=f"Lowest surviving tier is '{best_tier}'. Only that tier is offered, "
+               f"so a closer safe match is never undercut by a further one."))
+    trace.append(TraceStep(
+        step=7, name="Rank", status="info",
+        detail="By tier, then stock, then price, then manufacturer continuity.",
+        items=[f"{c.brand} ({c.ingredient}) · {c.product['strength']} · "
+               f"EGP {float(c.product['price_egp']):.0f}" for c in winners[:3]]))
 
     subs = [_to_substitute(c, qprod) for c in winners[:3]]
 
@@ -184,6 +235,12 @@ def answer(text: str,
             ans.guard_trips = guard_trips
             ans.model_used = model_used
             return finish(ans)
+
+    trace.append(TraceStep(
+        step=8, name="Narrate", status="info",
+        detail=(f"Rationale written by {model_used} through the validator guard "
+                f"({guard_trips} guard trip(s))." if model_used != "deterministic"
+                else "Narration stubbed — deterministic run, no model prose.")))
 
     ans = SubstitutionAnswer(
         query=query, tier=best_tier, escalate=False,

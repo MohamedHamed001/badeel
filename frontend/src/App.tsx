@@ -59,9 +59,14 @@ export default function App() {
         {view === "console" && (
           <Console
             options={options}
+            dataset={health?.dataset ?? "synthetic"}
             query={query}
             onChange={setQuery}
             onSubmit={() => run(query)}
+            onExample={(q) => {
+              setQuery(q);
+              run(q);
+            }}
             answer={answer}
             loading={loading}
             error={error}

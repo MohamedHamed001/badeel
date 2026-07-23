@@ -13,7 +13,7 @@ export function SubstituteCard({ sub, rank }: { sub: Substitute; rank: number })
 
   return (
     <div
-      className="border p-4"
+      className="border p-4 transition-colors hover:border-[var(--color-ink-muted)]"
       style={{ borderColor: "var(--color-rule)", background: "#fff" }}
     >
       <div className="flex items-baseline justify-between gap-3">
