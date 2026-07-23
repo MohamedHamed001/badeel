@@ -21,14 +21,14 @@ export function QueryBar({ options, loading, value, onChange, onSubmit }: Props)
           onChange={(e) => onChange({ ...value, text: e.target.value })}
           onKeyDown={(e) => e.key === "Enter" && !loading && value.text && onSubmit()}
           placeholder={t("query.placeholder")}
-          className="min-w-0 flex-1 border bg-white px-3 py-2.5 text-sm outline-none focus:border-[var(--color-ink)]"
-          style={{ borderColor: "var(--color-rule)", fontFamily: "var(--font-arabic)" }}
+          className="min-w-0 flex-1 rounded-lg border px-3.5 py-3 text-sm outline-none transition-colors focus:border-[var(--color-ink-muted)]"
+          style={{ borderColor: "var(--color-rule)", background: "var(--color-surface-2)", fontFamily: "var(--font-arabic)", color: "var(--color-ink)" }}
         />
         <button
           onClick={onSubmit}
           disabled={loading || !value.text}
-          className="px-5 py-2.5 text-sm font-medium disabled:opacity-40"
-          style={{ background: "var(--color-ink)", color: "var(--color-paper)" }}
+          className="rounded-lg px-6 py-3 text-sm font-semibold transition-opacity disabled:opacity-40"
+          style={{ background: "var(--color-clear)", color: "var(--color-bg)" }}
         >
           {loading ? "…" : t("query.analyze")}
         </button>
@@ -84,11 +84,11 @@ function ChipGroup({
             <button
               key={item}
               onClick={() => onToggle(item)}
-              className="border px-2 py-1 text-xs"
+              className="rounded-md border px-2.5 py-1 text-xs transition-colors"
               style={{
-                borderColor: on ? "var(--color-ink)" : "var(--color-rule)",
-                background: on ? "var(--color-ink)" : "transparent",
-                color: on ? "var(--color-paper)" : "var(--color-ink-muted)",
+                borderColor: on ? "var(--color-clear)" : "var(--color-rule)",
+                background: on ? "rgba(53,194,129,0.15)" : "var(--color-surface-2)",
+                color: on ? "var(--color-clear)" : "var(--color-ink-muted)",
               }}
             >
               {display(item)}

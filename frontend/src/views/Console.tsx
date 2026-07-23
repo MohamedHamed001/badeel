@@ -1,5 +1,6 @@
+import type { ReactNode } from "react";
 import type { RegistryOptions, SubstitutionAnswer } from "../types";
-import { verdict, toneColor } from "../verdict";
+import { verdict, toneColor, toneTint, toneGlyph } from "../verdict";
 import { useLang } from "../LangContext";
 import { QueryBar } from "../components/QueryBar";
 import { TierRail } from "../components/TierRail";
@@ -46,13 +47,15 @@ export function Console(props: Props) {
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8">
-      <QueryBar
-        options={props.options}
-        loading={loading}
-        value={props.query}
-        onChange={props.onChange}
-        onSubmit={props.onSubmit}
-      />
+      <div className="panel p-5">
+        <QueryBar
+          options={props.options}
+          loading={loading}
+          value={props.query}
+          onChange={props.onChange}
+          onSubmit={props.onSubmit}
+        />
+      </div>
 
       {error && (
         <p className="mt-6 text-sm" style={{ color: "var(--color-stop)" }}>
@@ -82,10 +85,7 @@ function EmptyState({
 }) {
   const { t, lang } = useLang();
   return (
-    <div
-      className="mt-10 border border-dashed p-8 text-center"
-      style={{ borderColor: "var(--color-rule)" }}
-    >
+    <div className="mt-6 rounded-xl border border-dashed p-10 text-center" style={{ borderColor: "var(--color-rule)" }}>
       <p className="text-sm" style={{ color: "var(--color-ink-muted)" }}>
         {t("empty.hint")}
       </p>
@@ -95,8 +95,8 @@ function EmptyState({
             key={ex.en}
             disabled={loading}
             onClick={() => onExample(ex.q)}
-            className="border px-3 py-1.5 text-xs transition-colors hover:border-[var(--color-ink)] disabled:opacity-40"
-            style={{ borderColor: "var(--color-rule)", color: "var(--color-ink)" }}
+            className="rounded-md border px-3 py-1.5 text-xs transition-colors hover:border-[var(--color-ink-muted)] disabled:opacity-40"
+            style={{ borderColor: "var(--color-rule)", background: "var(--color-surface)", color: "var(--color-ink)" }}
           >
             {lang === "ar" ? ex.ar : ex.en}
           </button>
@@ -121,42 +121,66 @@ function Result({
   const q = answer.query;
 
   return (
-    <div
-      className="rail-stop mt-8 border-t pt-8"
-      style={{ borderColor: "var(--color-rule)" }}
-    >
-      {/* Verdict — the largest element, with a signal accent bar. */}
-      <div className="flex gap-4">
-        <span
-          className="mt-1 w-1 shrink-0 self-stretch rounded-full"
-          style={{ background: color }}
-        />
-        <div className="min-w-0">
-          <h2
-            className="text-3xl font-semibold leading-none tracking-tight sm:text-[2.6rem]"
-            style={{ color }}
-          >
-            {t(v.key)}
-          </h2>
+    <div className="rise mt-6 space-y-5">
+      {/* Verdict banner — the largest element, signal-washed, unmistakable. */}
+      <div
+        className="relative overflow-hidden rounded-xl border p-6"
+        style={{ borderColor: "var(--color-rule)", background: toneTint[v.tone] }}
+      >
+        <span className="absolute inset-y-0 start-0 w-1.5" style={{ background: color }} />
+        <div className="ps-3">
+          <div className="flex items-center gap-3">
+            <span
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-base font-bold"
+              style={{ background: color, color: "var(--color-bg)" }}
+            >
+              {toneGlyph[v.tone]}
+            </span>
+            <h2 className="text-3xl font-bold leading-none tracking-tight sm:text-[2.4rem]" style={{ color }}>
+              {t(v.key)}
+            </h2>
+          </div>
+
+          {/* Interpretation — what is being substituted vs. patient context. */}
           {q.resolved_brand && (
-            <div className="mono mt-2 text-sm" style={{ color: "var(--color-ink-muted)" }}>
-              {q.resolved_brand} · {q.ingredient}
-              {q.strength ? ` · ${q.strength}` : ""}
-              {q.form ? ` · ${q.form}` : ""}
+            <div className="mt-5 flex flex-wrap items-stretch gap-x-8 gap-y-3">
+              <Interpret label={t("intp.substituting")} accent={color}>
+                <span className="font-semibold">{q.resolved_brand}</span>
+                <span className="mono ms-2 text-xs" style={{ color: "var(--color-ink-muted)" }}>
+                  {q.ingredient}
+                  {q.strength ? ` · ${q.strength}` : ""}
+                  {q.form ? ` · ${q.form}` : ""}
+                </span>
+              </Interpret>
+
+              {q.concurrent_meds.length > 0 && (
+                <Interpret label={t("intp.alsoOn")}>
+                  {q.concurrent_meds.join(", ")}
+                </Interpret>
+              )}
+              {q.patient_flags.length > 0 && (
+                <Interpret label={t("intp.flags")}>
+                  {q.patient_flags.join(", ")}
+                </Interpret>
+              )}
             </div>
           )}
+
           {answer.escalation_reason && (
-            <p className="mt-3 max-w-3xl text-sm leading-relaxed" style={{ color: "var(--color-ink)" }}>
+            <p className="mt-4 max-w-3xl text-sm leading-relaxed" style={{ color: "var(--color-ink)" }}>
               {answer.escalation_reason}
             </p>
           )}
         </div>
       </div>
 
-      <div className="mt-8 grid gap-8 lg:grid-cols-[190px_1fr_240px]">
-        <TierRail answer={answer} />
+      {/* Working area. */}
+      <div className="grid gap-5 lg:grid-cols-[210px_1fr_250px]">
+        <div className="panel p-5">
+          <TierRail answer={answer} />
+        </div>
 
-        <div className="space-y-3">
+        <div className="space-y-4">
           {answer.substitutes.length > 0 ? (
             answer.substitutes.map((s, i) => (
               <SubstituteCard
@@ -169,26 +193,51 @@ function Result({
             ))
           ) : (
             <div
-              className="flex items-center justify-center border border-dashed py-10 text-sm"
-              style={{ borderColor: "var(--color-rule)", color: "var(--color-ink-muted)" }}
+              className="panel flex items-center justify-center py-12 text-sm"
+              style={{ color: "var(--color-ink-muted)" }}
             >
               {t("result.nosub")}
             </div>
           )}
           <BlockedList blocked={answer.blocked_candidates} />
+          <AuditTrail trace={answer.trace} />
         </div>
 
-        <SafetyPanel flags={answer.safety_flags} />
+        {answer.safety_flags.length > 0 ? (
+          <div className="panel p-5">
+            <SafetyPanel flags={answer.safety_flags} />
+          </div>
+        ) : (
+          <div />
+        )}
       </div>
 
-      <AuditTrail trace={answer.trace} />
-
-      <div className="mono mt-6 flex flex-wrap gap-x-4 gap-y-1 text-[10px]" style={{ color: "var(--color-ink-muted)" }}>
+      <div className="mono flex flex-wrap gap-x-4 gap-y-1 text-[10px]" style={{ color: "var(--color-ink-muted)" }}>
         <span>{t("meta.model")}: {answer.model_used}</span>
         <span>{t("meta.trips")}: {answer.guard_trips}</span>
         <span>{t("meta.latency")}: {answer.latency_ms} ms</span>
         <span>{t("meta.resolution")}: {answer.query.resolution_score.toFixed(0)}</span>
       </div>
+    </div>
+  );
+}
+
+function Interpret({
+  label,
+  accent,
+  children,
+}: {
+  label: string;
+  accent?: string;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      className="border-s-2 ps-3"
+      style={{ borderColor: accent ?? "var(--color-rule)" }}
+    >
+      <div className="label mb-0.5">{label}</div>
+      <div className="text-sm" style={{ color: "var(--color-ink)" }}>{children}</div>
     </div>
   );
 }

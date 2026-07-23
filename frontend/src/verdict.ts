@@ -24,3 +24,18 @@ export const toneColor: Record<Tone, string> = {
   stop: "var(--color-stop)",
   neutral: "var(--color-ink-muted)",
 };
+
+// Faint signal-colour wash for the verdict banner background on dark.
+export const toneTint: Record<Tone, string> = {
+  clear: "rgba(53, 194, 129, 0.10)",
+  caution: "rgba(234, 161, 58, 0.10)",
+  stop: "rgba(242, 88, 77, 0.10)",
+  neutral: "rgba(138, 146, 158, 0.08)",
+};
+
+export const toneGlyph: Record<Tone, string> = {
+  clear: "✓",
+  caution: "!",
+  stop: "✕",
+  neutral: "•",
+};

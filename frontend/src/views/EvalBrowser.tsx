@@ -17,7 +17,7 @@ export function EvalBrowser({ onLoad }: { onLoad: (c: EvalCase) => void }) {
     <div className="mx-auto max-w-6xl px-6 py-8">
       <div className="label mb-3">{t("eval.title")}</div>
       {error && <p className="text-sm" style={{ color: "var(--color-stop)" }}>{error}</p>}
-      <div className="overflow-x-auto border" style={{ borderColor: "var(--color-rule)" }}>
+      <div className="panel overflow-x-auto p-0">
         <table className="w-full text-sm">
           <thead>
             <tr className="label border-b text-start" style={{ borderColor: "var(--color-rule)" }}>
@@ -32,7 +32,7 @@ export function EvalBrowser({ onLoad }: { onLoad: (c: EvalCase) => void }) {
             {cases.map((c) => (
               <tr
                 key={c.id}
-                className="border-b hover:bg-white"
+                className="border-b transition-colors hover:bg-[var(--color-surface-2)]"
                 style={{ borderColor: "var(--color-rule)" }}
               >
                 <td className="mono px-3 py-2 text-xs">{c.id}</td>
@@ -53,8 +53,8 @@ export function EvalBrowser({ onLoad }: { onLoad: (c: EvalCase) => void }) {
                 <td className="px-3 py-2 text-end">
                   <button
                     onClick={() => onLoad(c)}
-                    className="border px-2 py-1 text-xs"
-                    style={{ borderColor: "var(--color-rule)" }}
+                    className="rounded-md border px-2.5 py-1 text-xs transition-colors hover:border-[var(--color-clear)] hover:text-[var(--color-clear)]"
+                    style={{ borderColor: "var(--color-rule)", background: "var(--color-surface)" }}
                   >
                     {t("eval.run")}
                   </button>

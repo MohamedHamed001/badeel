@@ -27,6 +27,10 @@ const S = {
   "query.meds": { en: "Concurrent meds", ar: "أدوية متزامنة" },
   // empty state
   "empty.hint": { en: "Enter a shortage above, or start from a common case:", ar: "أدخل نقصاً بالأعلى، أو ابدأ من حالة شائعة:" },
+  // interpretation bar
+  "intp.substituting": { en: "Substituting", ar: "استبدال" },
+  "intp.alsoOn": { en: "Patient also on", ar: "المريض يتناول أيضاً" },
+  "intp.flags": { en: "Patient flags", ar: "حالات المريض" },
   // verdicts
   "verdict.stop": { en: "Do not substitute", ar: "لا تصرف بديلاً" },
   "verdict.caution": { en: "Permitted with counselling", ar: "مسموح مع إرشاد" },

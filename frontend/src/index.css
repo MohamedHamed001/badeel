@@ -4,19 +4,27 @@
 @import "@fontsource/ibm-plex-sans/400.css";
 @import "@fontsource/ibm-plex-sans/500.css";
 @import "@fontsource/ibm-plex-sans/600.css";
+@import "@fontsource/ibm-plex-sans/700.css";
 @import "@fontsource/ibm-plex-sans-arabic/400.css";
 @import "@fontsource/ibm-plex-sans-arabic/500.css";
+@import "@fontsource/ibm-plex-sans-arabic/600.css";
 @import "@fontsource/ibm-plex-mono/400.css";
 @import "@fontsource/ibm-plex-mono/500.css";
 
+/* Dark clinical console. Warm-neutral charcoal surfaces, ink-white text, and
+   three signal colours that glow on dark for the verdict-driven safety read. */
 @theme {
-  --color-paper: #fbfaf7;
-  --color-ink: #16181a;
-  --color-ink-muted: #6b7280;
-  --color-rule: #e3e1db;
-  --color-clear: #1f6f4a;
-  --color-caution: #b45309;
-  --color-stop: #a61b1b;
+  --color-bg: #0e1013;
+  --color-paper: #14171c; /* base surface (kept name for existing components) */
+  --color-surface: #191d24; /* elevated card */
+  --color-surface-2: #20252e; /* chips / inset */
+  --color-ink: #eceef2;
+  --color-ink-muted: #8a929e;
+  --color-rule: #2a3039;
+
+  --color-clear: #35c281; /* substitution permitted */
+  --color-caution: #eaa13a; /* permitted with counselling */
+  --color-stop: #f2584d; /* blocked or escalated */
 
   --font-sans: "IBM Plex Sans", "IBM Plex Sans Arabic", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
@@ -30,16 +38,20 @@ body,
 }
 
 body {
-  background: var(--color-paper);
+  background:
+    radial-gradient(1200px 600px at 78% -8%, rgba(53, 194, 129, 0.05), transparent 60%),
+    radial-gradient(900px 500px at 5% 0%, rgba(234, 161, 58, 0.035), transparent 55%),
+    var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 /* Small-caps section labels, drawn from printed pharmacopoeia monographs. */
 .label {
   font-size: 0.6875rem;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--color-ink-muted);
   font-weight: 500;
@@ -50,7 +62,17 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-/* The one animation in the app: the tier rail resolves top to bottom. */
+/* Elevated panel surface with a faint top highlight for depth. */
+.panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-rule);
+  border-radius: 12px;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.03) inset,
+    0 12px 30px -18px rgba(0, 0, 0, 0.7);
+}
+
+/* The one page-load animation: the result region resolves top to bottom. */
 @keyframes railIn {
   from {
     opacity: 0;
@@ -62,10 +84,33 @@ body {
   }
 }
 .rail-stop {
-  animation: railIn 0.32s ease both;
+  animation: railIn 0.34s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.rise {
+  animation: riseIn 0.4s cubic-bezier(0.22, 0.61, 0.36, 1) both;
 }
 @media (prefers-reduced-motion: reduce) {
-  .rail-stop {
+  .rail-stop,
+  .rise {
     animation: none;
   }
+}
+
+/* Selection + focus in the dark theme. */
+::selection {
+  background: rgba(53, 194, 129, 0.25);
+}
+input::placeholder {
+  color: var(--color-ink-muted);
+  opacity: 0.7;
 }

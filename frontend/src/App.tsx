@@ -152,27 +152,30 @@ function Header({
   return (
     <header
       className="flex items-center justify-between border-b px-6 py-3"
-      style={{ borderColor: "var(--color-rule)" }}
+      style={{ borderColor: "var(--color-rule)", background: "var(--color-paper)" }}
     >
-      <div className="flex items-baseline gap-6">
-        <span className="text-base font-semibold tracking-tight">
-          Badeel<span style={{ color: "var(--color-ink-muted)" }}> · بديل</span>
+      <div className="flex items-center gap-6">
+        <span className="text-base font-bold tracking-tight">
+          Badeel<span className="font-normal" style={{ color: "var(--color-ink-muted)" }}> · بديل</span>
         </span>
         <nav className="flex gap-1">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setView(tab.id)}
-              className="px-2.5 py-1 text-sm"
-              style={{
-                color: view === tab.id ? "var(--color-ink)" : "var(--color-ink-muted)",
-                borderBottom: view === tab.id ? "2px solid var(--color-ink)" : "2px solid transparent",
-                fontWeight: view === tab.id ? 600 : 400,
-              }}
-            >
-              {t(tab.key)}
-            </button>
-          ))}
+          {tabs.map((tab) => {
+            const on = view === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setView(tab.id)}
+                className="rounded-md px-3 py-1.5 text-sm transition-colors"
+                style={{
+                  color: on ? "var(--color-ink)" : "var(--color-ink-muted)",
+                  background: on ? "var(--color-surface-2)" : "transparent",
+                  fontWeight: on ? 600 : 400,
+                }}
+              >
+                {t(tab.key)}
+              </button>
+            );
+          })}
         </nav>
       </div>
 
@@ -180,10 +183,10 @@ function Header({
         {health && (
           <div className="mono hidden items-center gap-2 text-[10px] sm:flex" style={{ color: "var(--color-ink-muted)" }}>
             <span
-              className="rounded-sm px-1.5 py-0.5"
+              className="rounded px-1.5 py-0.5 font-semibold"
               style={{
-                background: health.dataset === "real" ? "var(--color-clear)" : "var(--color-rule)",
-                color: health.dataset === "real" ? "var(--color-paper)" : "var(--color-ink-muted)",
+                background: health.dataset === "real" ? "rgba(53,194,129,0.15)" : "var(--color-surface-2)",
+                color: health.dataset === "real" ? "var(--color-clear)" : "var(--color-ink-muted)",
               }}
             >
               {health.dataset === "real" ? t("chip.real") : t("chip.synthetic")}
@@ -193,8 +196,8 @@ function Header({
         )}
         <button
           onClick={() => setLang(lang === "en" ? "ar" : "en")}
-          className="border px-2 py-1 text-xs"
-          style={{ borderColor: "var(--color-rule)", fontFamily: lang === "en" ? "var(--font-arabic)" : "var(--font-mono)" }}
+          className="rounded-md border px-2.5 py-1 text-xs transition-colors hover:border-[var(--color-ink-muted)]"
+          style={{ borderColor: "var(--color-rule)", background: "var(--color-surface)", fontFamily: lang === "en" ? "var(--font-arabic)" : "var(--font-mono)" }}
         >
           {t("lang.toggle")}
         </button>

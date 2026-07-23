@@ -49,7 +49,7 @@ export function Results() {
     <div className="mx-auto max-w-4xl px-6 py-8">
       <div className="label mb-3">{t("results.title")}</div>
 
-      <table className="w-full border text-sm" style={{ borderColor: "var(--color-rule)" }}>
+      <table className="panel w-full overflow-hidden text-sm">
         <thead>
           <tr className="label border-b text-start" style={{ borderColor: "var(--color-rule)" }}>
             <th className="px-3 py-2 font-medium">{t("results.system")}</th>
@@ -73,15 +73,15 @@ export function Results() {
 
       <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
         {metrics.map(([k, key]) => (
-          <div key={k} className="border p-3" style={{ borderColor: "var(--color-rule)" }}>
+          <div key={k} className="panel p-4">
             <div className="label">{t(key)}</div>
-            <div className="mono mt-1 text-lg">{pct(k).toFixed(0)}%</div>
+            <div className="mono mt-1 text-xl">{pct(k).toFixed(0)}%</div>
           </div>
         ))}
       </div>
 
       <div className="label mt-8 mb-2">{t("results.pertrap")}</div>
-      <div className="overflow-x-auto border" style={{ borderColor: "var(--color-rule)" }}>
+      <div className="panel overflow-x-auto p-0">
         <table className="w-full text-sm">
           <tbody>
             {traps.map((trap) => {
