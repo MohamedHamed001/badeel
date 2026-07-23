@@ -1,0 +1,45 @@
+ingredient_a,ingredient_b,severity,effect
+Veltolol,Verapaxil,major,"Additive AV nodal suppression, risk of bradyarrhythmia"
+Veltolol,Gliclazex,moderate,Masks adrenergic warning signs of hypoglycaemia
+Menoprolol,Verapaxil,major,Additive AV nodal suppression
+Menoprolol,Veltoprofen,moderate,NSAIDs may blunt antihypertensive effect
+Carvedanol,Gliclazex,moderate,Enhanced hypoglycaemic effect
+Carvedanol,Verapaxil,major,Severe bradycardia and hypotension
+Lisinopran,Veltoprofen,major,Increased risk of acute kidney injury
+Lisinopran,Valsartex,major,"Dual RAAS blockade, hyperkalaemia and renal failure"
+Valsartex,Lisinopran,major,Dual RAAS blockade
+Valsartex,Veltoprofen,major,Increased risk of acute kidney injury
+Valsartex + Hydroclorix,Veltoprofen,major,Reduced diuretic efficacy and renal risk
+Warfaridine,Veltoprofen,major,Markedly increased bleeding risk
+Warfaridine,Azithromycex,major,"Potentiates anticoagulant effect, INR rise"
+Warfaridine,Diclofenax,major,Increased bleeding risk
+Xarelide,Veltoprofen,major,Increased bleeding risk
+Xarelide,Ciproflaxen,moderate,Raised plasma concentration
+Levothyral,Omeprazine,moderate,Reduced absorption
+Levothyral,Metformax,minor,Altered glycaemic control
+Valproax,Keppratex,moderate,Additive sedation
+Valproax,Warfaridine,major,"Displacement from protein binding, bleeding risk"
+Keppratex,Valproax,moderate,Additive sedation
+Veltoprofen,Warfaridine,major,Markedly increased bleeding risk
+Veltoprofen,Lisinopran,major,Acute kidney injury risk
+Veltoprofen,Xarelide,major,Increased bleeding risk
+Diclofenax,Warfaridine,major,Increased bleeding risk
+Diclofenax,Lisinopran,major,Acute kidney injury risk
+Paracetamide,Warfaridine,moderate,Prolonged regular use may raise INR
+Amoxicillex,Warfaridine,moderate,Possible INR elevation
+Azithromycex,Warfaridine,major,Potentiates anticoagulation
+Azithromycex,Ciproflaxen,major,Additive QT prolongation
+Ciproflaxen,Azithromycex,major,Additive QT prolongation
+Ciproflaxen,Xarelide,moderate,Raised plasma concentration
+Omeprazine,Clopidogrex,major,Reduced antiplatelet activation
+Omeprazine,Levothyral,moderate,Reduced thyroid hormone absorption
+Pantoprazine,Levothyral,moderate,Reduced thyroid hormone absorption
+Clopidogrex,Omeprazine,major,Reduced antiplatelet activation
+Clopidogrex,Veltoprofen,major,Increased bleeding risk
+Metformax,Ciproflaxen,minor,Possible glycaemic fluctuation
+Gliclazex,Veltolol,moderate,Masked hypoglycaemia warning signs
+Gliclazex,Carvedanol,moderate,Enhanced hypoglycaemic effect
+Atorvastin,Azithromycex,moderate,Increased myopathy risk
+Rosuvastin,Warfaridine,moderate,INR elevation reported
+Verapaxil,Veltolol,major,Additive AV nodal suppression
+Verapaxil,Carvedanol,major,Severe bradycardia

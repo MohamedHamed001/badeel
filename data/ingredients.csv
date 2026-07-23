@@ -1,0 +1,27 @@
+ingredient_id,name,atc,atc_level4,drug_class,equiv_group,nti,is_combination,components,pregnancy,forms
+ING001,Veltolol,C07AB07,C07AB,Selective beta-1 adrenergic blocker,beta_blocker_selective,0,0,,Category C. Use only if benefit outweighs foetal risk.,"tablet:2.5 mg/5 mg/10 mg; tablet, extended release:5 mg/10 mg"
+ING002,Menoprolol,C07AB02,C07AB,Selective beta-1 adrenergic blocker,beta_blocker_selective,0,0,,Category C. Foetal growth restriction reported with prolonged use.,tablet:25 mg/50 mg/100 mg
+ING003,Carvedanol,C07AG02,C07AG,Non-selective beta blocker with alpha-1 blockade,beta_blocker_nonselective,0,0,,Category C.,tablet:3.125 mg/6.25 mg/12.5 mg/25 mg
+ING004,Lisinopran,C09AA03,C09AA,Angiotensin converting enzyme inhibitor,raas_blocker,0,0,,Contraindicated in all trimesters. Discontinue immediately if pregnancy detected.,tablet:5 mg/10 mg/20 mg
+ING005,Valsartex,C09CA03,C09CA,Angiotensin II receptor blocker,raas_blocker,0,0,,Contraindicated in all trimesters.,tablet:40 mg/80 mg/160 mg
+ING006,Valsartex + Hydroclorix,C09DA03,C09DA,Angiotensin II receptor blocker with thiazide diuretic,raas_blocker_combination,0,1,Valsartex|Hydroclorix,Contraindicated in all trimesters.,tablet:80 mg / 12.5 mg/160 mg / 12.5 mg/160 mg / 25 mg
+ING007,Warfaridine,B01AA03,B01AA,Vitamin K antagonist oral anticoagulant,anticoagulant_vka,1,0,,Contraindicated. Teratogenic in first trimester.,tablet:1 mg/3 mg/5 mg
+ING008,Xarelide,B01AF01,B01AF,Direct factor Xa inhibitor,anticoagulant_doac,0,0,,Contraindicated.,tablet:10 mg/15 mg/20 mg
+ING009,Levothyral,H03AA01,H03AA,Synthetic thyroid hormone,thyroid_replacement,1,0,,Category A. Requirements typically increase during pregnancy.,tablet:25 mcg/50 mcg/75 mcg/100 mcg/125 mcg
+ING010,Valproax,N03AG01,N03AG,Broad spectrum antiepileptic,antiepileptic_broad,1,0,,Contraindicated. Established teratogen with neurodevelopmental risk.,"tablet, enteric coated:200 mg/500 mg; oral solution:200 mg/5 mL"
+ING011,Keppratex,N03AX14,N03AX,SV2A ligand antiepileptic,antiepileptic_broad,0,0,,Category C. Preferred over Valproax where treatment is required.,tablet:250 mg/500 mg/1000 mg; oral solution:100 mg/mL
+ING012,Veltoprofen,M01AE01,M01AE,Non-steroidal anti-inflammatory drug,nsaid,0,0,,Avoid in third trimester. Premature ductus closure.,tablet:200 mg/400 mg/600 mg; oral suspension:100 mg/5 mL
+ING013,Diclofenax,M01AB05,M01AB,Non-steroidal anti-inflammatory drug,nsaid,0,0,,Avoid in third trimester.,"tablet, enteric coated:25 mg/50 mg; gel:1%; suppository:100 mg"
+ING014,Paracetamide,N02BE01,N02BE,Non-opioid analgesic and antipyretic,simple_analgesic,0,0,,Category A. Analgesic of choice in pregnancy.,tablet:500 mg/1000 mg; oral suspension:120 mg/5 mL/250 mg/5 mL; suppository:125 mg/250 mg
+ING015,Amoxicillex,J01CA04,J01CA,Aminopenicillin antibiotic,penicillin,0,0,,Category B.,capsule:250 mg/500 mg; oral suspension:125 mg/5 mL/250 mg/5 mL
+ING016,Azithromycex,J01FA10,J01FA,Macrolide antibiotic,macrolide,0,0,,Category B.,tablet:250 mg/500 mg; oral suspension:200 mg/5 mL
+ING017,Ciproflaxen,J01MA02,J01MA,Fluoroquinolone antibiotic,fluoroquinolone,0,0,,Avoid. Cartilage toxicity in animal studies.,tablet:250 mg/500 mg/750 mg
+ING018,Omeprazine,A02BC01,A02BC,Proton pump inhibitor,ppi,0,0,,Category C.,"capsule, enteric coated:20 mg/40 mg"
+ING019,Pantoprazine,A02BC02,A02BC,Proton pump inhibitor,ppi,0,0,,Category B.,"tablet, enteric coated:20 mg/40 mg"
+ING020,Clopidogrex,B01AC04,B01AC,P2Y12 antiplatelet agent,antiplatelet,0,0,,Category B.,tablet:75 mg
+ING021,Metformax,A10BA02,A10BA,Biguanide antidiabetic,antidiabetic_oral,0,0,,Category B.,"tablet:500 mg/850 mg/1000 mg; tablet, extended release:500 mg/1000 mg"
+ING022,Gliclazex,A10BB09,A10BB,Sulfonylurea antidiabetic,antidiabetic_oral,0,0,,Not recommended. Switch to insulin.,"tablet:30 mg/60 mg; tablet, modified release:30 mg/60 mg"
+ING023,Atorvastin,C10AA05,C10AA,HMG-CoA reductase inhibitor,statin,0,0,,Contraindicated.,tablet:10 mg/20 mg/40 mg/80 mg
+ING024,Rosuvastin,C10AA07,C10AA,HMG-CoA reductase inhibitor,statin,0,0,,Contraindicated.,tablet:5 mg/10 mg/20 mg/40 mg
+ING025,Denufolin,V03AB99,V03AB,Specific chelating antidote,orphan_antidote,0,0,,Use only where life threatening toxicity is present.,solution for injection:100 mg/mL
+ING026,Verapaxil,C08DA01,C08DA,Non-dihydropyridine calcium channel blocker,ccb_nondhp,0,0,,Category C.,"tablet:40 mg/80 mg; tablet, sustained release:120 mg/240 mg"

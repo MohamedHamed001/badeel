@@ -1,0 +1,65 @@
+sku,brand,brand_ar,ingredient_id,ingredient,strength,form,manufacturer,price_egp,status,atc,equiv_group,nti
+SKU001,Cardex,كاردكس,ING001,Veltolol,5 mg,tablet,Nile Pharma,48.0,available,C07AB07,beta_blocker_selective,False
+SKU002,Cardex,كاردكس,ING001,Veltolol,10 mg,tablet,Nile Pharma,72.0,shortage,C07AB07,beta_blocker_selective,False
+SKU003,Cardex,كاردكس,ING001,Veltolol,2.5 mg,tablet,Nile Pharma,35.0,available,C07AB07,beta_blocker_selective,False
+SKU004,Veltocor,فيلتوكور,ING001,Veltolol,5 mg,tablet,Delta Labs,41.5,available,C07AB07,beta_blocker_selective,False
+SKU005,Bislon XR,بيسلون,ING001,Veltolol,5 mg,"tablet, extended release",Horus Pharm,88.0,available,C07AB07,beta_blocker_selective,False
+SKU006,Cardex Plus,كاردكس بلس,ING006,Valsartex + Hydroclorix,160 mg / 12.5 mg,tablet,Nile Pharma,130.0,available,C09DA03,raas_blocker_combination,False
+SKU007,Menocard,مينوكارد,ING002,Menoprolol,50 mg,tablet,Delta Labs,39.0,available,C07AB02,beta_blocker_selective,False
+SKU008,Prolix,برولكس,ING002,Menoprolol,25 mg,tablet,Sphinx Pharma,28.0,available,C07AB02,beta_blocker_selective,False
+SKU009,Prolix,برولكس,ING002,Menoprolol,100 mg,tablet,Sphinx Pharma,66.0,available,C07AB02,beta_blocker_selective,False
+SKU010,Carvex,كارفكس,ING003,Carvedanol,6.25 mg,tablet,Horus Pharm,52.0,available,C07AG02,beta_blocker_nonselective,False
+SKU011,Carvex,كارفكس,ING003,Carvedanol,12.5 mg,tablet,Horus Pharm,74.0,available,C07AG02,beta_blocker_nonselective,False
+SKU012,Dilanor,ديلانور,ING003,Carvedanol,25 mg,tablet,Nile Pharma,95.0,available,C07AG02,beta_blocker_nonselective,False
+SKU013,Lispril,ليسبريل,ING004,Lisinopran,10 mg,tablet,Delta Labs,44.0,available,C09AA03,raas_blocker,False
+SKU014,Lispril,ليسبريل,ING004,Lisinopran,20 mg,tablet,Delta Labs,61.0,shortage,C09AA03,raas_blocker,False
+SKU015,Tensodel,تنسوديل,ING004,Lisinopran,10 mg,tablet,Sphinx Pharma,38.5,available,C09AA03,raas_blocker,False
+SKU016,Valtec,فالتك,ING005,Valsartex,80 mg,tablet,Horus Pharm,92.0,available,C09CA03,raas_blocker,False
+SKU017,Valtec,فالتك,ING005,Valsartex,160 mg,tablet,Horus Pharm,140.0,available,C09CA03,raas_blocker,False
+SKU018,Sartanex,سارتانكس,ING005,Valsartex,80 mg,tablet,Nile Pharma,85.0,available,C09CA03,raas_blocker,False
+SKU019,Valtec Plus,فالتك بلس,ING006,Valsartex + Hydroclorix,80 mg / 12.5 mg,tablet,Horus Pharm,118.0,shortage,C09DA03,raas_blocker_combination,False
+SKU020,Valtec Plus,فالتك بلس,ING006,Valsartex + Hydroclorix,160 mg / 12.5 mg,tablet,Horus Pharm,145.0,available,C09DA03,raas_blocker_combination,False
+SKU021,Coagulex,كواجولكس,ING007,Warfaridine,5 mg,tablet,Sphinx Pharma,55.0,shortage,B01AA03,anticoagulant_vka,True
+SKU022,Coagulex,كواجولكس,ING007,Warfaridine,3 mg,tablet,Sphinx Pharma,48.0,available,B01AA03,anticoagulant_vka,True
+SKU023,Warfex,وارفكس,ING007,Warfaridine,5 mg,tablet,Delta Labs,51.0,available,B01AA03,anticoagulant_vka,True
+SKU024,Xarelid,زاريليد,ING008,Xarelide,20 mg,tablet,Horus Pharm,420.0,available,B01AF01,anticoagulant_doac,False
+SKU025,Xarelid,زاريليد,ING008,Xarelide,15 mg,tablet,Horus Pharm,390.0,available,B01AF01,anticoagulant_doac,False
+SKU026,Thyroxel,ثيروكسيل,ING009,Levothyral,50 mcg,tablet,Nile Pharma,32.0,shortage,H03AA01,thyroid_replacement,True
+SKU027,Thyroxel,ثيروكسيل,ING009,Levothyral,100 mcg,tablet,Nile Pharma,45.0,available,H03AA01,thyroid_replacement,True
+SKU028,Euthyral,يوثيرال,ING009,Levothyral,50 mcg,tablet,Delta Labs,36.0,available,H03AA01,thyroid_replacement,True
+SKU029,Depakex,ديباكس,ING010,Valproax,500 mg,"tablet, enteric coated",Sphinx Pharma,78.0,shortage,N03AG01,antiepileptic_broad,True
+SKU030,Depakex,ديباكس,ING010,Valproax,200 mg,"tablet, enteric coated",Sphinx Pharma,54.0,available,N03AG01,antiepileptic_broad,True
+SKU031,Levex,ليفكس,ING011,Keppratex,500 mg,tablet,Delta Labs,165.0,available,N03AX14,antiepileptic_broad,False
+SKU032,Levex,ليفكس,ING011,Keppratex,1000 mg,tablet,Delta Labs,240.0,available,N03AX14,antiepileptic_broad,False
+SKU033,Veltofen,فيلتوفين,ING012,Veltoprofen,400 mg,tablet,Nile Pharma,22.0,available,M01AE01,nsaid,False
+SKU034,Profex,بروفكس,ING012,Veltoprofen,400 mg,tablet,Sphinx Pharma,18.5,available,M01AE01,nsaid,False
+SKU035,Profex,بروفكس,ING012,Veltoprofen,600 mg,tablet,Sphinx Pharma,26.0,shortage,M01AE01,nsaid,False
+SKU036,Diclorel,ديكلوريل,ING013,Diclofenax,50 mg,"tablet, enteric coated",Delta Labs,20.0,available,M01AB05,nsaid,False
+SKU037,Volterex,فولتركس,ING013,Diclofenax,50 mg,"tablet, enteric coated",Horus Pharm,24.0,available,M01AB05,nsaid,False
+SKU038,Volterex Gel,فولتركس جل,ING013,Diclofenax,1%,gel,Horus Pharm,58.0,available,M01AB05,nsaid,False
+SKU039,Panadex,بانادكس,ING014,Paracetamide,500 mg,tablet,Nile Pharma,12.0,available,N02BE01,simple_analgesic,False
+SKU040,Feverol,فيفرول,ING014,Paracetamide,500 mg,tablet,Delta Labs,10.5,available,N02BE01,simple_analgesic,False
+SKU041,Feverol Kids,فيفرول كيدز,ING014,Paracetamide,120 mg/5 mL,oral suspension,Delta Labs,26.0,available,N02BE01,simple_analgesic,False
+SKU042,Amoxil-N,أموكسيل,ING015,Amoxicillex,500 mg,capsule,Nile Pharma,45.0,shortage,J01CA04,penicillin,False
+SKU043,Penamox,بيناموكس,ING015,Amoxicillex,500 mg,capsule,Sphinx Pharma,42.0,available,J01CA04,penicillin,False
+SKU044,Penamox,بيناموكس,ING015,Amoxicillex,250 mg/5 mL,oral suspension,Sphinx Pharma,38.0,available,J01CA04,penicillin,False
+SKU045,Azitrex,أزيتركس,ING016,Azithromycex,500 mg,tablet,Horus Pharm,95.0,available,J01FA10,macrolide,False
+SKU046,Zithrolex,زيثرولكس,ING016,Azithromycex,250 mg,tablet,Delta Labs,72.0,available,J01FA10,macrolide,False
+SKU047,Ciprodex-O,سيبرودكس,ING017,Ciproflaxen,500 mg,tablet,Nile Pharma,58.0,available,J01MA02,fluoroquinolone,False
+SKU048,Floxarel,فلوكساريل,ING017,Ciproflaxen,500 mg,tablet,Sphinx Pharma,54.0,available,J01MA02,fluoroquinolone,False
+SKU049,Omezel,أوميزيل,ING018,Omeprazine,20 mg,"capsule, enteric coated",Delta Labs,33.0,available,A02BC01,ppi,False
+SKU050,Gastrolux,جاسترولكس,ING018,Omeprazine,20 mg,"capsule, enteric coated",Nile Pharma,29.0,shortage,A02BC01,ppi,False
+SKU051,Pantorex,بانتوركس,ING019,Pantoprazine,40 mg,"tablet, enteric coated",Horus Pharm,47.0,available,A02BC02,ppi,False
+SKU052,Clopidex,كلوبيدكس,ING020,Clopidogrex,75 mg,tablet,Sphinx Pharma,88.0,available,B01AC04,antiplatelet,False
+SKU053,Glucoformin,جلوكوفورمين,ING021,Metformax,500 mg,tablet,Nile Pharma,26.0,available,A10BA02,antidiabetic_oral,False
+SKU054,Glucoformin,جلوكوفورمين,ING021,Metformax,1000 mg,tablet,Nile Pharma,40.0,shortage,A10BA02,antidiabetic_oral,False
+SKU055,Metfex XR,ميتفكس,ING021,Metformax,1000 mg,"tablet, extended release",Delta Labs,68.0,available,A10BA02,antidiabetic_oral,False
+SKU056,Diaclex MR,دياكلكس,ING022,Gliclazex,60 mg,"tablet, modified release",Horus Pharm,72.0,available,A10BB09,antidiabetic_oral,False
+SKU057,Atorex,أتوركس,ING023,Atorvastin,20 mg,tablet,Delta Labs,64.0,shortage,C10AA05,statin,False
+SKU058,Lipidex,ليبيدكس,ING023,Atorvastin,20 mg,tablet,Sphinx Pharma,59.0,available,C10AA05,statin,False
+SKU059,Lipidex,ليبيدكس,ING023,Atorvastin,40 mg,tablet,Sphinx Pharma,86.0,available,C10AA05,statin,False
+SKU060,Rosulex,روزوليكس,ING024,Rosuvastin,10 mg,tablet,Horus Pharm,78.0,available,C10AA07,statin,False
+SKU061,Rosulex,روزوليكس,ING024,Rosuvastin,20 mg,tablet,Horus Pharm,104.0,available,C10AA07,statin,False
+SKU062,Denufex,دينوفكس,ING025,Denufolin,100 mg/mL,solution for injection,Nile Pharma,1250.0,shortage,V03AB99,orphan_antidote,False
+SKU063,Verapex,فيرابكس,ING026,Verapaxil,80 mg,tablet,Sphinx Pharma,31.0,available,C08DA01,ccb_nondhp,False
+SKU064,Verapex SR,فيرابكس,ING026,Verapaxil,240 mg,"tablet, sustained release",Sphinx Pharma,69.0,available,C08DA01,ccb_nondhp,False
