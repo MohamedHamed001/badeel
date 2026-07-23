@@ -20,8 +20,6 @@ interface Props {
   onSubmit: () => void;
   onExample: (q: Query) => void;
   answer: SubstitutionAnswer | null;
-  streamText: string;
-  narrating: boolean;
   loading: boolean;
   error: string | null;
 }
@@ -63,13 +61,26 @@ export function Console(props: Props) {
         </p>
       )}
 
-      {!answer && !error && (
+      {loading && <Loader />}
+
+      {!loading && !answer && !error && (
         <EmptyState examples={examples} onExample={props.onExample} loading={loading} />
       )}
 
-      {answer && (
-        <Result answer={answer} streamText={props.streamText} narrating={props.narrating} />
-      )}
+      {!loading && answer && <Result answer={answer} />}
+    </div>
+  );
+}
+
+function Loader() {
+  const { t } = useLang();
+  return (
+    <div className="rise mt-6 flex flex-col items-center justify-center gap-4 rounded-xl border py-20" style={{ borderColor: "var(--color-rule)" }}>
+      <span
+        className="h-8 w-8 animate-spin rounded-full border-2 border-transparent"
+        style={{ borderTopColor: "var(--color-clear)", borderRightColor: "var(--color-clear)" }}
+      />
+      <span className="label">{t("loading.analyzing")}</span>
     </div>
   );
 }
@@ -106,15 +117,7 @@ function EmptyState({
   );
 }
 
-function Result({
-  answer,
-  streamText,
-  narrating,
-}: {
-  answer: SubstitutionAnswer;
-  streamText: string;
-  narrating: boolean;
-}) {
+function Result({ answer }: { answer: SubstitutionAnswer }) {
   const { t } = useLang();
   const v = verdict(answer);
   const color = toneColor[v.tone];
@@ -183,12 +186,7 @@ function Result({
         <div className="space-y-4">
           {answer.substitutes.length > 0 ? (
             <>
-              <SubstituteCard
-                sub={answer.substitutes[0]}
-                rank={1}
-                streamText={streamText}
-                narrating={narrating}
-              />
+              <SubstituteCard sub={answer.substitutes[0]} rank={1} />
               {answer.substitutes.length > 1 && (
                 <div className="space-y-2">
                   <div className="label pt-1">{t("result.alternatives")}</div>

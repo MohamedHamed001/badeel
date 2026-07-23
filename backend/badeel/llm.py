@@ -28,6 +28,10 @@ def get_llm(temperature: float = 0.0) -> BaseChatModel:
         )
 
     from langchain_openai import ChatOpenAI
+    # reasoning_effort=low tells reasoning models (e.g. gpt-oss) to skip most of
+    # the silent "thinking" phase, so the first token comes far sooner. Unknown
+    # fields are ignored by OpenAI-compatible servers that don't reason.
+    effort = os.getenv("LLM_REASONING_EFFORT", "low")
     return ChatOpenAI(
         model=model,
         base_url=os.getenv("LLM_BASE_URL"),
@@ -35,6 +39,7 @@ def get_llm(temperature: float = 0.0) -> BaseChatModel:
         temperature=temperature,
         timeout=60,
         max_retries=2,
+        extra_body={"reasoning_effort": effort} if effort else None,
     )
 
 

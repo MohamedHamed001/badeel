@@ -21,8 +21,6 @@ export default function App() {
 
   const [query, setQuery] = useState<Query>(EMPTY);
   const [answer, setAnswer] = useState<SubstitutionAnswer | null>(null);
-  const [streamText, setStreamText] = useState("");
-  const [narrating, setNarrating] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const lastRun = useRef<Query | null>(null);
@@ -43,48 +41,50 @@ export default function App() {
     lastRun.current = q;
     setLoading(true);
     setError(null);
-    setStreamText("");
-    setNarrating(false);
+    setAnswer(null);
+
+    // Buffer the whole response and reveal it ONCE, complete with rationale —
+    // the user sees a single loading state, then the finished result. No
+    // partial render, no text that appears then changes.
+    let pending: SubstitutionAnswer | null = null;
+    let done = false;
+    const reveal = (a: SubstitutionAnswer) => {
+      setAnswer(a);
+      setLoading(false);
+      done = true;
+    };
+
     await substituteStream(
       { ...q, lang: l },
       {
         onAnswer: (a) => {
-          setAnswer(a);
-          setLoading(false); // deterministic result is ready; prose streams next
+          pending = a;
         },
-        onNarrating: () => setNarrating(true),
-        // We intentionally do NOT render tokens live: the leak-guard validates
-        // only once the prose is complete, so a live stream could show text and
-        // then retract it. Show a 'generating' indicator instead, reveal the
-        // full validated rationale on done.
+        onNarrating: () => {},
         onDelta: () => {},
         onDone: (i, d) => {
-          setStreamText("");
-          setNarrating(false);
-          setAnswer((prev) =>
-            prev
-              ? {
-                  ...prev,
-                  guard_trips: prev.guard_trips + (d.guard_trip ? 1 : 0),
-                  substitutes: prev.substitutes.map((s, idx) =>
-                    idx === i
-                      ? { ...s, rationale: d.rationale, evidence: (d.evidence as typeof s.evidence) ?? s.evidence }
-                      : s,
-                  ),
-                }
-              : prev,
-          );
+          if (!pending) return;
+          reveal({
+            ...pending,
+            guard_trips: pending.guard_trips + (d.guard_trip ? 1 : 0),
+            substitutes: pending.substitutes.map((s, idx) =>
+              idx === i
+                ? { ...s, rationale: d.rationale, evidence: (d.evidence as typeof s.evidence) ?? s.evidence }
+                : s,
+            ),
+          });
         },
         onError: (e) => {
           setError(`Request failed: ${e}`);
           setAnswer(null);
           setLoading(false);
-          setNarrating(false);
+          done = true;
         },
       },
     );
+    // escalations / narration-off: no `done` event, reveal the buffered answer
+    if (!done && pending) reveal(pending);
     setLoading(false);
-    setNarrating(false);
   }
 
   function setLang(l: Lang) {
@@ -122,8 +122,6 @@ export default function App() {
                 run(q);
               }}
               answer={answer}
-              streamText={streamText}
-              narrating={narrating}
               loading={loading}
               error={error}
             />

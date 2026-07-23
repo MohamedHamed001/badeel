@@ -6,21 +6,15 @@ import { tierLabel } from "../i18n";
 export function SubstituteCard({
   sub,
   rank,
-  streamText = "",
-  narrating = false,
   compact = false,
 }: {
   sub: Substitute;
   rank: number;
-  streamText?: string;
-  narrating?: boolean;
   compact?: boolean;
 }) {
-  const { lang, t } = useLang();
+  const { lang } = useLang();
   const delta = sub.price_delta_pct;
   const deltaStr = `${delta > 0 ? "+" : ""}${delta.toFixed(0)}%`;
-  const streaming = narrating || streamText.length > 0;
-  const waiting = narrating && streamText.length === 0;
 
   // Secondary options (alternative brands of the same tier) render as a slim
   // row — the primary recommendation carries the rationale.
@@ -85,19 +79,9 @@ export function SubstituteCard({
         )}
       </div>
 
-      {(streaming || sub.rationale) && (
+      {sub.rationale && (
         <p className="mt-4 text-sm leading-relaxed" style={{ color: "var(--color-ink)" }}>
-          {waiting ? (
-            <span className="italic" style={{ color: "var(--color-ink-muted)" }}>
-              {t("card.generating")}
-              <span
-                className="ms-1 inline-block h-3.5 w-1.5 translate-y-0.5 animate-pulse"
-                style={{ background: "var(--color-clear)" }}
-              />
-            </span>
-          ) : (
-            sub.rationale
-          )}
+          {sub.rationale}
         </p>
       )}
 
