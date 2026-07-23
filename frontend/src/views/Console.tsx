@@ -182,15 +182,22 @@ function Result({
 
         <div className="space-y-4">
           {answer.substitutes.length > 0 ? (
-            answer.substitutes.map((s, i) => (
+            <>
               <SubstituteCard
-                key={i}
-                sub={s}
-                rank={i + 1}
-                streamText={i === 0 ? streamText : ""}
-                narrating={i === 0 && narrating}
+                sub={answer.substitutes[0]}
+                rank={1}
+                streamText={streamText}
+                narrating={narrating}
               />
-            ))
+              {answer.substitutes.length > 1 && (
+                <div className="space-y-2">
+                  <div className="label pt-1">{t("result.alternatives")}</div>
+                  {answer.substitutes.slice(1).map((s, i) => (
+                    <SubstituteCard key={i + 1} sub={s} rank={i + 2} compact />
+                  ))}
+                </div>
+              )}
+            </>
           ) : (
             <div
               className="panel flex items-center justify-center py-12 text-sm"

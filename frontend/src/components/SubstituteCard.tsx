@@ -8,17 +8,49 @@ export function SubstituteCard({
   rank,
   streamText = "",
   narrating = false,
+  compact = false,
 }: {
   sub: Substitute;
   rank: number;
   streamText?: string;
   narrating?: boolean;
+  compact?: boolean;
 }) {
   const { lang } = useLang();
   const delta = sub.price_delta_pct;
   const deltaStr = `${delta > 0 ? "+" : ""}${delta.toFixed(0)}%`;
   const streaming = narrating || streamText.length > 0;
   const waiting = narrating && streamText.length === 0;
+
+  // Secondary options (alternative brands of the same tier) render as a slim
+  // row — the primary recommendation carries the rationale.
+  if (compact) {
+    return (
+      <div
+        className="flex items-center justify-between gap-3 rounded-lg border px-4 py-3"
+        style={{ borderColor: "var(--color-rule)", background: "var(--color-surface)" }}
+      >
+        <div className="flex items-baseline gap-2.5">
+          <span className="mono text-xs" style={{ color: "var(--color-ink-muted)" }}>
+            {String(rank).padStart(2, "0")}
+          </span>
+          <span className="text-sm font-semibold">{sub.brand}</span>
+          <span className="text-xs" style={{ color: "var(--color-ink-muted)" }}>
+            {sub.ingredient}
+          </span>
+        </div>
+        <div className="mono flex items-center gap-2 text-xs">
+          <Chip>{sub.strength}</Chip>
+          <Chip>EGP {sub.price_egp.toFixed(2)}</Chip>
+          {delta !== 0 && (
+            <Chip color={delta > 0 ? "var(--color-caution)" : "var(--color-clear)"}>
+              {deltaStr}
+            </Chip>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="panel p-5">

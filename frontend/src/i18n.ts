@@ -44,6 +44,7 @@ const S = {
   "tier.none": { en: "Escalate", ar: "تصعيد" },
   // substitute / safety / blocked
   "result.nosub": { en: "No substitute offered — see the safety panel and reasoning.", ar: "لا يوجد بديل — راجع لوحة السلامة والتحليل." },
+  "result.alternatives": { en: "Other available options", ar: "بدائل متاحة أخرى" },
   "safety.title": { en: "Safety", ar: "السلامة" },
   "blocked.title": { en: "Considered and rejected", ar: "تم النظر فيها ورفضها" },
   "audit.toggle": { en: "Show reasoning", ar: "اعرض التحليل" },
