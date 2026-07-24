@@ -40,6 +40,12 @@ realistic ATC-code structure), so the ground truth is true by construction and t
 
 * **Deterministic tier assignment & safety filter** — generic / same-class /
   therapeutic tiers and all safety checks are pure Python, not model output.
+* **LLM comprehension of the request** — the model *reads* the free-text query into
+  structured fields (intent, drug, patient conditions, concurrent meds); Python then
+  re-validates every field (drug via the registry, conditions against the safety
+  vocabulary) before any of it reaches a decision. It understands "available" vs "out
+  of stock", and lifts a condition stated in prose ("…and the patient has asthma")
+  into the safety filter — while never choosing a drug or a verdict itself.
 * **Validator guard (anti-hallucination)** — every LLM suggestion is validated
   against the retrieved candidate set; on failure the chain retries once with the
   error, then escalates. Guard trips are logged per model.
@@ -47,9 +53,14 @@ realistic ATC-code structure), so the ground truth is true by construction and t
   first-choice cedes to a safe alternative; narrow-therapeutic-index drugs
   short-circuit to escalation; unknown drugs are refused, not fuzzy-matched.
 * **Grounded RAG narration with citations** — hybrid retrieval (dense embeddings +
-  BM25 + reciprocal rank fusion) over SPC-style leaflets, chunked by section.
+  BM25 + reciprocal rank fusion) over SPC-style leaflets, chunked by section, with an
+  optional cross-encoder reranker (`bge-reranker-base`, env-gated).
 * **Bilingual input** — accepts Arabic and English pharmacist queries, with brand,
   misspelling and transliteration resolution.
+* **"Did you mean?" suggestions** — an unrecognised or mistyped product surfaces the
+  fuzzy resolver's near-misses as one-click chips (real registered brands only). The
+  LLM never chooses which drug the pipeline runs on — Python proposes, the pharmacist
+  confirms.
 * **Provider-agnostic LLM layer** — local Ollama or any OpenAI-compatible endpoint,
   selected purely by environment variables; embeddings always run locally and free.
 * **Professional dispensing UI** — three views with a signature "tier rail" that
@@ -189,14 +200,34 @@ lifts overall correctness roughly **9×** over the naive baseline **without touc
 safety**. This is the argument of the project: the deterministic layer decides, the
 model only writes, and the guard keeps the prose grounded.
 
+### Retrieval reranker (ablation)
+
+The optional cross-encoder reranker (`BADEEL_RERANK=1`) reorders the leaflet passages
+that ground the narration. It only touches the *explanation*, never the decision —
+retrieval output is consumed by the narration chains alone, so the graded
+tier/escalate/safety numbers are identical with it on or off (confirm:
+`BADEEL_RERANK=0` then `=1` through `run_eval.py`). Measured on an 8-probe set with a
+label-free proxy (does the top passage land on a clinically high-value section?):
+
+| Retrieval | top-1 high-value hit-rate |
+| --------- | ------------------------- |
+| Hybrid + RRF        | 12.5% |
+| **+ cross-encoder** | **25.0%** |
+
+Reproduce with `python backend/scripts/compare_rerank.py`. The gain is real but
+modest — retrieval is already scoped to a single drug's ~10 sections — and that is the
+point: safety is architecturally decoupled from retrieval, so better retrieval sharpens
+the counselling prose while the decision stays provably unaffected.
+
 ---
 
 # 🔮 Future Improvements
 
-* **Cross-encoder reranker** (`bge-reranker-base`) on top of hybrid retrieval, with a
-  measured with/without comparison.
 * **Public deployment** on Hugging Face Spaces (single Docker image serving the API
   and the built frontend from one origin) plus the demo video.
+* **LLM-assisted resolution** — let the model *propose* a spelling correction, then
+  force it back through the deterministic registry so only a real registered brand is
+  ever accepted (the model suggests, Python confirms).
 
 ---
 

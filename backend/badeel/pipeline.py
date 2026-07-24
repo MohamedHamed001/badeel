@@ -23,8 +23,8 @@ from . import safety as safety_mod
 from .i18n import t
 from .registry import Registry, get_registry
 from .safety import contraindication_flag, load_leaflets
-from .schemas import (BlockedCandidate, DrugQuery, SafetyFlag, Substitute,
-                      SubstitutionAnswer, TraceStep)
+from .schemas import (BlockedCandidate, Comprehension, DrugQuery, SafetyFlag,
+                      Substitute, SubstitutionAnswer, TraceStep)
 
 TIER_ORDER = {"generic": 0, "class": 1, "therapeutic": 2, "none": 3}
 
@@ -35,24 +35,58 @@ def answer(text: str,
            reg: Registry | None = None,
            narrate: bool = False,
            meta: dict | None = None,
-           lang: str = "en") -> SubstitutionAnswer:
+           lang: str = "en",
+           comprehend: bool = False) -> SubstitutionAnswer:
     reg = reg or get_registry()
     started = time.perf_counter()
     meta = meta or {}
     trace: list[TraceStep] = []
 
-    # 1. RESOLVE
-    query = reg.resolve(text)
-    # explicit request fields override anything the text implied
-    if patient_flags is not None:
-        query.patient_flags = patient_flags
-    if concurrent_meds is not None:
-        query.concurrent_meds = concurrent_meds
+    # 0. COMPREHEND (live path only). The LLM only *reads* the request into
+    # structured fields; comprehension.py re-validates every one before it can
+    # reach a decision. Off by default, so the graded eval never invokes it and
+    # the pipeline degrades cleanly when no model is reachable.
+    comp = None
+    if comprehend:
+        try:
+            from .comprehension import comprehend_request
+            from .llm import get_llm
+            comp = comprehend_request(get_llm(), text, reg)
+        except Exception:
+            comp = None
+    comp_model: Comprehension | None = None
 
     def finish(ans: SubstitutionAnswer) -> SubstitutionAnswer:
         ans.trace = trace
+        ans.comprehension = comp_model
         ans.latency_ms = int((time.perf_counter() - started) * 1000)
         return ans
+
+    # 1. RESOLVE — prefer the drug the LLM identified, but only if it actually
+    # resolves; otherwise fall back to scanning the whole message (today's path).
+    resolve_text = text
+    if comp and comp.drug and not reg.resolve(comp.drug).unresolved:
+        resolve_text = comp.drug
+    query = reg.resolve(resolve_text)
+    # explicit request fields override anything the text implied
+    if patient_flags is not None:
+        query.patient_flags = list(patient_flags)
+    if concurrent_meds is not None:
+        query.concurrent_meds = list(concurrent_meds)
+    # union in what comprehension read and Python validated — flags/meds only
+    # ever *add* caution, never remove a check, so this can't weaken safety.
+    if comp:
+        query.patient_flags = _union(query.patient_flags, comp.flags)
+        query.concurrent_meds = _union(query.concurrent_meds, comp.meds)
+        comp_model = Comprehension(
+            intent=comp.intent, drug=query.resolved_brand or comp.drug,
+            flags=comp.flags, meds=comp.meds)
+
+    # 0b. NOT A SHORTAGE — the message says the drug is available: don't
+    # substitute, explain calmly. This is not a clinical refusal.
+    if comp and comp.intent == "not_a_shortage":
+        drug_name = query.resolved_brand or comp.drug or text
+        return finish(_not_a_shortage(query, drug_name, lang))
 
     if query.unresolved:
         trace.append(TraceStep(
@@ -348,6 +382,25 @@ def _to_substitute(cand, qprod) -> Substitute:
         form=p["form"], tier=cand.tier, price_egp=price, price_delta_pct=delta,
         rationale="",  # narration stubbed until phase 4
         counselling_flags=list(dict.fromkeys(cand.counselling_flags)))
+
+
+def _union(a: list[str], b: list[str]) -> list[str]:
+    """Order-preserving union — used to merge comprehension-derived flags/meds
+    with any the request supplied explicitly."""
+    out = list(a)
+    for x in b:
+        if x not in out:
+            out.append(x)
+    return out
+
+
+def _not_a_shortage(query: DrugQuery, drug_name: str, lang: str = "en"):
+    """Comprehension read the message as 'the drug is available', not a shortage.
+    Not a clinical refusal — no red verdict, no substitute, a calm explanation."""
+    return SubstitutionAnswer(
+        query=query, tier="none", escalate=False,
+        escalation_reason=t(lang, "esc.not_a_shortage", drug=drug_name),
+        substitutes=[], confidence=1.0, model_used="deterministic")
 
 
 def _escalate(query: DrugQuery, reason: str, flags=None, blocked=None):

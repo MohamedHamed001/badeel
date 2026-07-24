@@ -72,6 +72,30 @@ def test_resolves_brand_embedded_in_arabic_sentence(reg):
     assert q.resolved_brand == "Cardex"
 
 
+# ---- "did you mean?" suggestions (deterministic, near-miss only) ----
+
+def test_gibberish_yields_no_suggestions(reg):
+    # the Zeroxan gate case must stay unknown — no confident guess for gibberish
+    assert reg.suggest("Zeroxan") == []
+    assert reg.suggest("xqzwp") == []
+
+
+def test_typo_surfaces_the_right_brand(reg):
+    sug = reg.suggest("Thyrox")
+    assert sug, "a plausible typo should surface at least one suggestion"
+    assert sug[0].brand == "Thyroxel"
+    assert sug[0].ingredient  # carries the molecule, for display
+    # suggestions live strictly below the acceptance threshold (else they'd resolve)
+    assert all(s.score < 88.0 for s in sug)
+
+
+def test_unresolved_query_carries_suggestions(reg):
+    q = reg.resolve("Thyrox")
+    assert q.unresolved is True
+    assert q.resolved_brand is None
+    assert any(s.brand == "Thyroxel" for s in q.suggestions)
+
+
 # ---- registry loads the full universe -------------------------------
 
 def test_registry_loads_all_products(reg):

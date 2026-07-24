@@ -67,7 +67,7 @@ export function Console(props: Props) {
         <EmptyState examples={examples} onExample={props.onExample} loading={loading} />
       )}
 
-      {!loading && answer && <Result answer={answer} />}
+      {!loading && answer && <Result answer={answer} onExample={props.onExample} />}
     </div>
   );
 }
@@ -117,11 +117,20 @@ function EmptyState({
   );
 }
 
-function Result({ answer }: { answer: SubstitutionAnswer }) {
+function Result({
+  answer,
+  onExample,
+}: {
+  answer: SubstitutionAnswer;
+  onExample: (q: Query) => void;
+}) {
   const { t } = useLang();
   const v = verdict(answer);
   const color = toneColor[v.tone];
   const q = answer.query;
+  const c = answer.comprehension;
+  const notShortage = c?.intent === "not_a_shortage";
+  const understood = c ? [c.drug, ...c.flags, ...c.meds].filter(Boolean) : [];
 
   return (
     <div className="rise mt-6 space-y-5">
@@ -144,8 +153,16 @@ function Result({ answer }: { answer: SubstitutionAnswer }) {
             </h2>
           </div>
 
-          {/* Interpretation — what is being substituted vs. patient context. */}
-          {q.resolved_brand && (
+          {/* What the LLM read from the free text (Python re-validated it). */}
+          {understood.length > 0 && (
+            <p className="mono mt-2 text-xs" style={{ color: "var(--color-ink-muted)" }}>
+              {t("comprehension.understood")}: {understood.join(" · ")}
+            </p>
+          )}
+
+          {/* Interpretation — what is being substituted vs. patient context.
+              Suppressed for a "not a shortage" reading: nothing is substituted. */}
+          {q.resolved_brand && !notShortage && (
             <div className="mt-5 flex flex-wrap items-stretch gap-x-8 gap-y-3">
               <Interpret label={t("intp.substituting")} accent={color}>
                 <span className="font-semibold">{q.resolved_brand}</span>
@@ -173,6 +190,36 @@ function Result({ answer }: { answer: SubstitutionAnswer }) {
             <p className="mt-4 max-w-3xl text-sm leading-relaxed" style={{ color: "var(--color-ink)" }}>
               {answer.escalation_reason}
             </p>
+          )}
+
+          {/* Deterministic "did you mean?" — the fuzzy resolver's near-misses,
+              real registered brands only. Clicking one re-runs with the patient
+              context preserved. The LLM plays no part in this. */}
+          {q.unresolved && q.suggestions.length > 0 && (
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <span className="label" style={{ color: "var(--color-ink-muted)" }}>
+                {t("query.didyoumean")}
+              </span>
+              {q.suggestions.map((s) => (
+                <button
+                  key={s.brand}
+                  onClick={() =>
+                    onExample({
+                      text: s.brand,
+                      patient_flags: q.patient_flags,
+                      concurrent_meds: q.concurrent_meds,
+                    })
+                  }
+                  className="rounded-md border px-3 py-1.5 text-xs transition-colors hover:border-[var(--color-ink-muted)]"
+                  style={{ borderColor: "var(--color-rule)", background: "var(--color-surface)", color: "var(--color-ink)" }}
+                >
+                  <span className="font-semibold">{s.brand}</span>
+                  <span className="mono ms-1.5" style={{ color: "var(--color-ink-muted)" }}>
+                    {s.ingredient}
+                  </span>
+                </button>
+              ))}
+            </div>
           )}
         </div>
       </div>

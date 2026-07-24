@@ -20,7 +20,7 @@ from functools import lru_cache
 from rapidfuzz import fuzz, process
 
 from .config import ALIASES_CSV, FUZZY_THRESHOLD, INGREDIENTS_CSV, PRODUCTS_CSV
-from .schemas import DrugQuery
+from .schemas import DrugQuery, Suggestion
 
 # Word tokens including Arabic script.
 _WORD = re.compile(r"[\w؀-ۿ]+", re.UNICODE)
@@ -93,7 +93,8 @@ class Registry:
 
         brand, score = self._match(norm, low)
         if brand is None:
-            return DrugQuery(raw_text=raw, unresolved=True, resolution_score=score)
+            return DrugQuery(raw_text=raw, unresolved=True, resolution_score=score,
+                             suggestions=self.suggest(norm))
 
         prod = self.by_brand[brand]
         return DrugQuery(
@@ -103,6 +104,33 @@ class Registry:
             resolution_score=score,
             unresolved=False,
         )
+
+    def suggest(self, text: str, limit: int = 3, floor: float = 70.0) -> list[Suggestion]:
+        """Deterministic "did you mean?" candidates for a query that did not
+        resolve. Reuses the same fuzzy scorer as resolution, but keeps the
+        near-misses just *below* the acceptance threshold — a real typo surfaces
+        the right brand, while genuine gibberish (score < floor) yields nothing,
+        so an unknown drug stays unknown. Python proposes; the pharmacist picks."""
+        raw = (text or "").strip()
+        if not raw:
+            return []
+        surfaces = list(self.surface_to_brand.keys())
+        hits = process.extract(raw, surfaces, scorer=fuzz.WRatio, limit=limit * 4)
+        out: list[Suggestion] = []
+        seen: set[str] = set()
+        for surface, score, _ in hits:
+            if score >= FUZZY_THRESHOLD or score < floor:
+                continue
+            brand = self.surface_to_brand[surface]
+            if brand in seen:
+                continue
+            seen.add(brand)
+            out.append(Suggestion(brand=brand,
+                                  ingredient=self.by_brand[brand]["ingredient"],
+                                  score=float(score)))
+            if len(out) >= limit:
+                break
+        return out
 
     def _match(self, norm: str, low: str) -> tuple[str | None, float]:
         # 1. exact alias

@@ -25,6 +25,7 @@ const S = {
   "query.analyze": { en: "Analyze", ar: "حلّل" },
   "query.flags": { en: "Patient flags", ar: "حالات المريض" },
   "query.meds": { en: "Concurrent meds", ar: "أدوية متزامنة" },
+  "query.didyoumean": { en: "Did you mean", ar: "هل تقصد" },
   // empty state
   "empty.hint": { en: "Enter a shortage above, or start from a common case:", ar: "أدخل نقصاً بالأعلى، أو ابدأ من حالة شائعة:" },
   // interpretation bar
@@ -36,6 +37,8 @@ const S = {
   "verdict.caution": { en: "Permitted with counselling", ar: "مسموح مع إرشاد" },
   "verdict.clear": { en: "Substitution permitted", ar: "الاستبدال مسموح" },
   "verdict.unresolved": { en: "Not in registry", ar: "غير موجود في السجل" },
+  "verdict.notshortage": { en: "Not a shortage", ar: "ليست حالة نقص" },
+  "comprehension.understood": { en: "Read from your message", ar: "قُرئ من رسالتك" },
   // tier rail
   "rail.title": { en: "Tier rail", ar: "سلّم الفئات" },
   "tier.generic": { en: "Generic", ar: "جنيس" },

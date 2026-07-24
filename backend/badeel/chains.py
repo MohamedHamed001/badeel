@@ -38,6 +38,35 @@ def extract_fields(llm, query: str) -> dict:
         return {}
 
 
+_INTENTS = {"substitution", "not_a_shortage", "unclear"}
+
+
+def comprehend(llm, query: str) -> dict:
+    """Read the free-text request into structured fields (intent + drug + clinical
+    context). Prompt-and-parse, best-effort: the LLM only *reads*; Python
+    re-validates every field before it can influence a decision. Returns {} on
+    any parse/model failure so the caller degrades to the deterministic path."""
+    prompt = _load("comprehension.v1.md").replace("{query}", query)
+    try:
+        raw = llm.invoke(prompt)
+        text = getattr(raw, "content", raw)
+        data = extract_json(text if isinstance(text, str) else str(text))
+        intent = str(data.get("intent") or "").strip().lower()
+        if intent not in _INTENTS:
+            intent = "substitution"      # never block on an unexpected label
+        drug = data.get("drug")
+        return {
+            "intent": intent,
+            "drug": (drug or None) if isinstance(drug, str) else None,
+            "strength": data.get("strength"),
+            "form": data.get("form"),
+            "patient_flags": [str(s).lower() for s in data.get("patient_flags") or []],
+            "concurrent_meds": [str(m) for m in data.get("concurrent_meds") or []],
+        }
+    except Exception:
+        return {}
+
+
 _ARABIC = ("\n\nWrite the \"rationale\" and every \"counselling_flags\" entry in "
            "ARABIC (Modern Standard Arabic suitable for a pharmacist). Keep the "
            "JSON keys and the \"ingredient\" value in English exactly as given; "

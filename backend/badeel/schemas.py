@@ -21,6 +21,26 @@ class SubstituteRequest(BaseModel):
     lang: Literal["en", "ar"] = "en"
 
 
+class Suggestion(BaseModel):
+    """A near-miss brand for an unresolved query — a deterministic "did you
+    mean?" candidate. Additive: never a decision, only an input aid. The LLM
+    plays no part; these come straight from the fuzzy resolver."""
+    brand: str
+    ingredient: str
+    score: float
+
+
+class Comprehension(BaseModel):
+    """What the LLM read from the free-text request, after Python re-validated
+    every field. Additive and audit-only: it records what was understood (and
+    shows it back to the pharmacist); the deterministic pipeline still decides.
+    Present only when the comprehension layer ran; None means it did not."""
+    intent: str = "substitution"          # substitution | not_a_shortage | unclear
+    drug: str | None = None
+    flags: list[str] = Field(default_factory=list)
+    meds: list[str] = Field(default_factory=list)
+
+
 class DrugQuery(BaseModel):
     raw_text: str
     resolved_brand: str | None = None
@@ -31,6 +51,7 @@ class DrugQuery(BaseModel):
     concurrent_meds: list[str] = Field(default_factory=list)
     resolution_score: float = 0.0
     unresolved: bool = False
+    suggestions: list[Suggestion] = Field(default_factory=list)
 
 
 class Citation(BaseModel):
@@ -98,6 +119,7 @@ class SubstitutionAnswer(BaseModel):
     blocked_candidates: list[BlockedCandidate] = Field(default_factory=list)
     tier_summary: list[TierStat] = Field(default_factory=list)
     trace: list[TraceStep] = Field(default_factory=list)
+    comprehension: Comprehension | None = None
     confidence: float = 0.0
     guard_trips: int = 0
     latency_ms: int = 0

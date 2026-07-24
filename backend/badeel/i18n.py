@@ -66,6 +66,13 @@ MESSAGES: dict[str, dict[str, str]] = {
         "en": "model could not produce a grounded suggestion",
         "ar": "تعذّر على النموذج إنتاج اقتراح موثّق",
     },
+    "esc.not_a_shortage": {
+        "en": "This reads as a note that {drug} is available — there is nothing "
+              "to substitute. If it is actually short or out of stock, say so and "
+              "I will find a safe alternative.",
+        "ar": "هذا يبدو ملاحظة بأن {drug} متوفّر — لا يوجد ما يُستبدل. إن كان "
+              "فعلاً ناقصاً أو غير متوفّر، فاذكر ذلك وسأبحث عن بديل آمن.",
+    },
     # --- safety flags -------------------------------------------------------
     "flag.nti": {
         "en": "Narrow therapeutic index: substitution, including brand-to-brand, "

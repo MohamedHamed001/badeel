@@ -41,3 +41,10 @@ DEV_ORIGIN = os.getenv("DEV_ORIGIN", "http://localhost:5173")
 # Tuned so that Carvex resolves to Carvex, never to the near-neighbour Cardex,
 # and a non-existent brand (Zeroxan) stays unresolved. See tests/test_registry.py.
 FUZZY_THRESHOLD = float(os.getenv("FUZZY_THRESHOLD", "88"))
+
+# Optional cross-encoder reranker over the hybrid-retrieval results. Off by
+# default: it only sharpens the leaflet evidence fed to the LLM narration, never
+# the deterministic decision, and it pulls a ~1 GB model on first use. Turn on
+# with BADEEL_RERANK=1 to demo/measure the retrieval-quality improvement.
+RERANK = os.getenv("BADEEL_RERANK", "0") == "1"
+RERANK_MODEL = os.getenv("RERANK_MODEL", "BAAI/bge-reranker-base")

@@ -10,6 +10,10 @@ export interface Verdict {
 
 // The verdict line: the largest element on screen, states the outcome plainly.
 export function verdict(a: SubstitutionAnswer): Verdict {
+  // The LLM read the message as "the drug is available" — not a shortage, and
+  // not a clinical refusal. A calm, neutral state, never the red stop.
+  if (a.comprehension?.intent === "not_a_shortage")
+    return { key: "verdict.notshortage", tone: "neutral" };
   if (a.query.unresolved) return { key: "verdict.unresolved", tone: "stop" };
   if (a.escalate) return { key: "verdict.stop", tone: "stop" };
   const hasCounselling = a.substitutes.some((s) => s.counselling_flags.length > 0);

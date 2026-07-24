@@ -60,7 +60,8 @@ NARRATE = os.getenv("BADEEL_NARRATE", "0") == "1"
 @app.post("/api/substitute", response_model=SubstitutionAnswer)
 def substitute(req: SubstituteRequest) -> SubstitutionAnswer:
     return answer(req.text, req.patient_flags, req.concurrent_meds,
-                  get_registry(), narrate=NARRATE, lang=req.lang)
+                  get_registry(), narrate=NARRATE, lang=req.lang,
+                  comprehend=NARRATE)
 
 
 def _sse(event: str, data) -> str:
@@ -80,7 +81,7 @@ def substitute_stream(req: SubstituteRequest):
 
     def gen():
         ans = answer(req.text, req.patient_flags, req.concurrent_meds, reg,
-                     narrate=False, lang=req.lang)
+                     narrate=False, lang=req.lang, comprehend=NARRATE)
         yield _sse("answer", ans.model_dump())
 
         if not (NARRATE and ans.substitutes and not ans.escalate):
@@ -193,6 +194,7 @@ def health():
         "chroma_docs": _doc_count(),
         "narration": "enabled" if NARRATE else "stubbed",
         "dataset": config.DATASET,
+        "rerank": "on" if config.RERANK else "off",
     }
 
 

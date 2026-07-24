@@ -3,6 +3,12 @@
 export type Tier = "generic" | "class" | "therapeutic" | "none";
 export type Severity = "minor" | "moderate" | "major";
 
+export interface Suggestion {
+  brand: string;
+  ingredient: string;
+  score: number;
+}
+
 export interface DrugQuery {
   raw_text: string;
   resolved_brand: string | null;
@@ -13,6 +19,7 @@ export interface DrugQuery {
   concurrent_meds: string[];
   resolution_score: number;
   unresolved: boolean;
+  suggestions: Suggestion[];
 }
 
 export interface Citation {
@@ -72,6 +79,13 @@ export interface TraceStep {
   items: string[];
 }
 
+export interface Comprehension {
+  intent: "substitution" | "not_a_shortage" | "unclear";
+  drug: string | null;
+  flags: string[];
+  meds: string[];
+}
+
 export interface SubstitutionAnswer {
   query: DrugQuery;
   tier: Tier;
@@ -82,6 +96,7 @@ export interface SubstitutionAnswer {
   blocked_candidates: BlockedCandidate[];
   tier_summary: TierStat[];
   trace: TraceStep[];
+  comprehension: Comprehension | null;
   confidence: number;
   guard_trips: number;
   latency_ms: number;

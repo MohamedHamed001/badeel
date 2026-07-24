@@ -13,10 +13,15 @@ from __future__ import annotations
 import re
 from functools import lru_cache
 
+from . import config
 from .config import CHROMA_DIR, LEAFLETS_DIR
 
 EMBED_MODEL = "BAAI/bge-small-en-v1.5"
 COLLECTION = "leaflets"
+
+# Size of the fused pool handed to the reranker. Wider than k so the cross
+# encoder has room to reorder; ignored when reranking is off.
+RERANK_POOL = 20
 
 
 def _chunks():
@@ -49,6 +54,7 @@ class Retriever:
         self._texts = chunk_texts
         self._meta = chunk_meta
         self._bm25 = bm25
+        self._ce = None   # cross-encoder, loaded lazily on first rerank
 
     @classmethod
     def load(cls) -> "Retriever":
@@ -77,11 +83,22 @@ class Retriever:
     def doc_count(self) -> int:
         return self._col.count()
 
-    def search(self, query: str, scope: list[str] | None = None, k: int = 5):
-        """Hybrid dense+BM25 with RRF. `scope` restricts to these ingredients."""
+    def search(self, query: str, scope: list[str] | None = None, k: int = 5,
+               rerank: bool | None = None):
+        """Hybrid dense+BM25 with RRF. `scope` restricts to these ingredients.
+
+        `rerank` layers a cross-encoder on top of the fused ranking: the RRF
+        order picks a wide pool, the reranker reorders it by direct
+        query-passage relevance, and the top `k` are returned. Defaults to
+        `config.RERANK`; pass an explicit bool to compare modes in one process.
+        This only changes which leaflet passages ground the LLM prose — never
+        the deterministic decision.
+        """
+        if rerank is None:
+            rerank = config.RERANK
         where = {"ingredient": {"$in": scope}} if scope else None
 
-        dense = self._col.query(query_texts=[query], n_results=20, where=where)
+        dense = self._col.query(query_texts=[query], n_results=RERANK_POOL, where=where)
         dense_ids = dense["ids"][0] if dense["ids"] else []
 
         scored = self._bm25.get_scores(_tok(query))
@@ -92,18 +109,37 @@ class Retriever:
             if allowed and self._meta[i]["ingredient"] not in allowed:
                 continue
             lex_ids.append(self._ids[i])
-            if len(lex_ids) >= 20:
+            if len(lex_ids) >= RERANK_POOL:
                 break
 
-        fused = _rrf(dense_ids, lex_ids)[:k]
         idx = {cid: i for i, cid in enumerate(self._ids)}
+        fused = [cid for cid in _rrf(dense_ids, lex_ids) if cid in idx]
+
+        if rerank and fused:
+            pool = fused[:RERANK_POOL]
+            pairs = [(query, self._texts[idx[cid]]) for cid in pool]
+            scores = self._reranker().predict(pairs)
+            pool = [cid for _, cid in sorted(zip(scores, pool),
+                                             key=lambda z: z[0], reverse=True)]
+            ordered = pool[:k]
+        else:
+            ordered = fused[:k]
+
         return [
             {"leaflet": self._meta[idx[cid]]["leaflet"],
              "section": self._meta[idx[cid]]["section"],
              "ingredient": self._meta[idx[cid]]["ingredient"],
              "text": self._texts[idx[cid]]}
-            for cid in fused if cid in idx
+            for cid in ordered
         ]
+
+    def _reranker(self):
+        """Lazy cross-encoder — loaded once, only when reranking is used, so the
+        ~1 GB model never touches the default path, the --no-llm eval, or CI."""
+        if self._ce is None:
+            from sentence_transformers import CrossEncoder
+            self._ce = CrossEncoder(config.RERANK_MODEL)
+        return self._ce
 
 
 def _rrf(*ranked_lists, kconst: int = 60) -> list[str]:
