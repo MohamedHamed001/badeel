@@ -30,9 +30,12 @@ strength and combination-product rules) also runs in Python. The LLM only writes
 counselling prose, and a **Pydantic validator guard** rejects any drug it names that
 is not in the retrieved candidate set — the project's anti-hallucination mechanism.
 
-The drug universe is **fully synthetic** (fictional brands and ingredients with
+The graded drug universe is **fully synthetic** (fictional brands and ingredients with
 realistic ATC-code structure), so the ground truth is true by construction and the
-30-case evaluation set can be deliberately adversarial. Not for clinical use.
+30-case evaluation set can be deliberately adversarial. A second, parallel dataset of
+**real molecules and real Egyptian brand names** (Concor, Plavix, Glucophage…) ships
+alongside it for demonstration — the pipeline is data-agnostic and runs unchanged on
+either. Not for clinical use.
 
 ---
 
@@ -64,9 +67,14 @@ realistic ATC-code structure), so the ground truth is true by construction and t
 * **Provider-agnostic LLM layer** — local Ollama or any OpenAI-compatible endpoint,
   selected purely by environment variables; embeddings always run locally and free.
 * **Professional dispensing UI** — three views with a signature "tier rail" that
-  makes the decision algorithm visible; refusals are as legible as approvals.
+  makes the decision algorithm visible; refusals are as legible as approvals. Full
+  **English ⇄ العربية** toggle with real RTL layout, interface and clinical text.
+* **Two interchangeable datasets** — the graded synthetic universe, or a real-drug demo
+  set (real molecules, real Egyptian brands) selected with one environment variable.
+* **Degrades gracefully** — with no model reachable the app still boots and serves the
+  complete deterministic pipeline; only the prose and comprehension switch off.
 * **Reproducible, graded evaluation** — 30 adversarial cases, a harsh scorer, and a
-  CI-friendly deterministic test suite (42 tests).
+  CI-friendly deterministic test suite (53 tests, fully offline).
 
 ---
 
@@ -74,10 +82,11 @@ realistic ATC-code structure), so the ground truth is true by construction and t
 
 **Backend**
 
-* Python 3.11, FastAPI, Uvicorn
+* Python 3.11, FastAPI, Uvicorn (JSON API + Server-Sent Events streaming)
 * LangChain (LCEL, prompt-and-parse — no native tool calling)
 * Pydantic v2 (data contracts + the validator guard)
 * Chroma (vector store) · `sentence-transformers` `BAAI/bge-small-en-v1.5` (local embeddings)
+* `BAAI/bge-reranker-base` cross-encoder (optional reranking)
 * `rank_bm25` (lexical search) · `rapidfuzz` (fuzzy brand resolution)
 * pandas · pytest
 
@@ -91,6 +100,38 @@ realistic ATC-code structure), so the ground truth is true by construction and t
 
 * Ollama Cloud / local Ollama / any OpenAI-compatible endpoint
 * Developed & evaluated against `gpt-oss:120b` (Ollama Cloud, free tier)
+
+---
+
+# 🗂️ Repository structure
+
+```
+backend/
+  main.py                  FastAPI app: routes, CORS, SSE, static mount
+  badeel/
+    registry.py            CSV load + brand resolution (aliases, fuzzy, suggestions)
+    candidates.py          tier generation: generic / same-class / therapeutic
+    safety.py              the six safety checks + patient-flag vocabulary
+    comprehension.py       LLM reads the query -> Python re-validates every field
+    retrieval.py           RAG: Chroma dense + BM25 + RRF (+ optional reranker)
+    guard.py               the Pydantic validator guard (anti-hallucination)
+    chains.py  llm.py      prompt-and-parse chains, provider factory
+    pipeline.py            orchestration — the single entry point, answer()
+    schemas.py  config.py  i18n.py
+  prompts/*.md             versioned LLM prompt templates
+  scripts/                 ingest.py · run_eval.py · compare_rerank.py
+  tests/                   53 offline tests
+frontend/src/              Vite + React + TS: views, components, i18n, api client
+data/                      synthetic dataset (graded) + data/real/ (demo)
+pharmacopeia.py            source of truth for the synthetic drug universe
+eval_cases.py              the 30 labelled adversarial cases
+build_dataset.py           renders the sources into data/
+score.py                   the grader (harsh, safety-first)
+```
+
+A rule the layout enforces: `candidates.py` never imports `safety.py`, and neither
+imports `llm.py` — that separation is what makes "the model never decides" verifiable
+rather than aspirational.
 
 ---
 
@@ -119,35 +160,51 @@ provider at all** (narration simply disabled).
 
 # 🚀 Usage
 
-**Run the API (deterministic, no model needed):**
+**Run the API (deterministic, no model needed).** Run from `backend/` — that is where
+`main.py` lives. Once `frontend/dist` exists it is served from the same origin, so
+`http://localhost:8000` gives you the whole app:
 
 ```bash
 cd backend && uvicorn main:app --reload          # http://localhost:8000
 ```
 
-**Enable LLM narration (optional):**
+**Enable the LLM (narration + query comprehension):**
 
 ```bash
-BADEEL_NARRATE=1 uvicorn main:app --reload        # needs a provider in .env
+cd backend && BADEEL_NARRATE=1 uvicorn main:app --reload    # needs a provider in .env
 ```
 
-**Run the frontend (dev):**
+**Run the frontend with hot reload (optional, for development):**
 
 ```bash
 cd frontend && npm run dev                        # http://localhost:5173
 ```
 
-**Try it** — ask a question in Arabic or English, e.g. `Cardex 10 mg is short and the
-patient has asthma` → *Do not substitute* (all beta-blockers contraindicated), or
-`Atorex 20 mg is out of stock` → a generic alternative with price and counselling.
+**Environment flags** — all optional, all off by default:
+
+| Variable | Default | Effect |
+| --- | --- | --- |
+| `BADEEL_NARRATE` | `0` | `1` enables LLM narration **and** query comprehension |
+| `BADEEL_DATASET` | `synthetic` | `real` switches to the real-drug demo dataset |
+| `BADEEL_RERANK` | `0` | `1` adds the cross-encoder reranker (downloads ~1 GB once) |
+| `FUZZY_THRESHOLD` | `88` | brand fuzzy-match acceptance (0–100) |
+
+**Try it** — ask in Arabic or English, e.g. `Cardex 10 mg is short and the patient has
+asthma` → *Do not substitute* (all beta-blockers contraindicated), or `Atorex 20 mg is
+out of stock` → a generic alternative with price and counselling. With `BADEEL_NARRATE=1`,
+`Atorex is available` is understood as **not a shortage** rather than a substitution request.
 
 **Reproduce the evaluation:**
 
 ```bash
 python backend/scripts/run_eval.py --no-llm && python score.py predictions.jsonl   # deterministic
 python backend/scripts/run_eval.py         && python score.py predictions.jsonl   # full pipeline
-pytest backend/tests -q                                                            # 42 tests
+cd backend && pytest tests -q                                                      # 53 tests, offline
 ```
+
+The evaluation always runs on the synthetic dataset with structured inputs, so the
+graded numbers are independent of the demo dataset, the UI language, and the
+comprehension layer.
 
 **API examples:**
 
@@ -175,8 +232,19 @@ use" banner:
   a case into the console.
 * **Results** — the before/after table and per-trap breakdown.
 
-> A public Hugging Face Spaces URL and a 3-minute demo video are added with the
-> deployment step. The video opens with a refusal case, not a success case.
+**Cases worth trying** (start with the refusals — they are the point of the project):
+
+| Query | Outcome |
+| --- | --- |
+| `Coagulex 5 mg is short` | **Do not substitute** — narrow therapeutic index, refer to prescriber |
+| `Cardex 10 mg is short` + *bronchial asthma* | **Do not substitute** — every beta-blocker is contraindicated |
+| `Denufex is unavailable` | **Do not substitute** — no alternative exists; the hallucination trap |
+| `Atorex 20 mg is out of stock` | Generic alternative, with price delta and counselling |
+| `Gastrolux is out, patient takes Clopidex` | A *blocked* first choice cedes to a safe same-class option |
+| `Zeroxan is short` | Not in registry — refused, with "did you mean?" suggestions |
+
+Run the demo on real Egyptian brand names with `BADEEL_DATASET=real` (Concor, Plavix,
+Risek, Marevan…). The app runs locally; public deployment is listed under future work.
 
 ---
 
@@ -185,20 +253,39 @@ use" banner:
 Measured on the 30-case adversarial evaluation set. **Safety** (never suggesting a
 forbidden drug) is the primary metric.
 
-| System                                   | Correct | Safe   |
-| ---------------------------------------- | ------- | ------ |
-| Ungrounded-LLM floor (baseline in spec)  | 3.3%    | 26.7%  |
-| Deterministic naive baseline             | 0.0%    | 83.3%  |
-| **Badeel — full pipeline (`gpt-oss:120b`)** | **60.0%** | **100.0%** |
+| System                                      | Correct   | Safe       |
+| ------------------------------------------- | --------- | ---------- |
+| Ungrounded-LLM floor (baseline in spec)     | 3.3%      | 26.7%      |
+| Deterministic naive baseline (class swap)   | 0.0%      | 83.3%      |
+| Badeel — deterministic only, no model        | 6.7%      | **100.0%** |
+| **Badeel — full pipeline (`gpt-oss:120b`)** | **56.7%** | **100.0%** |
 
 Additional metrics for the full pipeline: tier accuracy **76.7%**, escalation
-accuracy **86.7%**, recall **86.7%**, safety-flag coverage **66.7%**.
+accuracy **86.7%**, recall **86.7%**, safety-flag coverage **63.3%**, with **3 guard
+trips** across the 30 cases — the guard is load-bearing, not decorative.
 
-**Key finding:** the deterministic layer holds **safety at 100%** with or without the
-model — it never suggests a forbidden ingredient. Adding the guarded LLM narration
-lifts overall correctness roughly **9×** over the naive baseline **without touching
-safety**. This is the argument of the project: the deterministic layer decides, the
-model only writes, and the guard keeps the prose grounded.
+Safety is **100% in every one of the 13 trap categories** — 30/30 cases, no exceptions,
+including the hallucination trap (`no_substitute`, where no alternative exists at all),
+the narrow-therapeutic-index cases, and the brand-collision pairs.
+
+**Key finding — read the third row against the fourth.** The deterministic layer alone
+already holds **safety at 100%**: with no model reachable at all, it never suggests a
+forbidden ingredient. What the guarded LLM adds is *helpfulness* — correctness rises
+from 6.7% to 56.7% (roughly **8×**) while safety does not move, because the model is
+never allowed to touch the decision. That is the whole argument of the project: the
+deterministic layer decides, the model only writes, and the guard keeps the prose
+grounded.
+
+*On reproducibility:* tier, escalation, recall and safety are deterministic and
+reproduce exactly. The two prose-dependent metrics (overall correct, safety-flag
+coverage) move by about one case between runs, because the scorer checks whether the
+model's wording surfaced specific safety concepts and hosted models are not perfectly
+repeatable even at `temperature=0`. Safety is unaffected either way.
+
+(The deterministic row scores low on *correctness* by construction: with narration off
+it emits no prose, so it cannot satisfy the scorer's `must_flag` requirement that
+specific safety concepts be stated in words. Its tier and escalation decisions are
+identical to the full pipeline's.)
 
 ### Retrieval reranker (ablation)
 
