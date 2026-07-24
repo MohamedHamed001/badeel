@@ -60,10 +60,12 @@ either. Not for clinical use.
   optional cross-encoder reranker (`bge-reranker-base`, env-gated).
 * **Bilingual input** — accepts Arabic and English pharmacist queries, with brand,
   misspelling and transliteration resolution.
-* **"Did you mean?" suggestions** — an unrecognised or mistyped product surfaces the
-  fuzzy resolver's near-misses as one-click chips (real registered brands only). The
-  LLM never chooses which drug the pipeline runs on — Python proposes, the pharmacist
-  confirms.
+* **"Did you mean?" suggestions** — a mistyped product surfaces the fuzzy resolver's
+  *near-misses* as one-click chips (real registered brands only, scoring just below the
+  acceptance threshold). A string that resembles nothing in the registry deliberately
+  gets **no** suggestion at all, so an unknown drug stays unknown rather than being
+  guessed into a real one. The LLM never chooses which drug the pipeline runs on —
+  Python proposes, the pharmacist confirms.
 * **Provider-agnostic LLM layer** — local Ollama or any OpenAI-compatible endpoint,
   selected purely by environment variables; embeddings always run locally and free.
 * **Professional dispensing UI** — three views with a signature "tier rail" that
@@ -241,7 +243,8 @@ use" banner:
 | `Denufex is unavailable` | **Do not substitute** — no alternative exists; the hallucination trap |
 | `Atorex 20 mg is out of stock` | Generic alternative, with price delta and counselling |
 | `Gastrolux is out, patient takes Clopidex` | A *blocked* first choice cedes to a safe same-class option |
-| `Zeroxan is short` | Not in registry — refused, with "did you mean?" suggestions |
+| `Thyrox is short` | Not in registry — refused, but offers a **"did you mean Thyroxel?"** chip |
+| `Zeroxan is short` | Not in registry — refused with **no** suggestion; it is not a typo of any real brand |
 
 Run the demo on real Egyptian brand names with `BADEEL_DATASET=real` (Concor, Plavix,
 Risek, Marevan…). The app runs locally; public deployment is listed under future work.
