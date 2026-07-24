@@ -85,8 +85,29 @@ def test_typo_surfaces_the_right_brand(reg):
     assert sug, "a plausible typo should surface at least one suggestion"
     assert sug[0].brand == "Thyroxel"
     assert sug[0].ingredient  # carries the molecule, for display
-    # suggestions live strictly below the acceptance threshold (else they'd resolve)
-    assert all(s.score < 88.0 for s in sug)
+
+
+def test_suggestions_are_case_insensitive(reg):
+    """Capitalisation must not change the outcome: WRatio is case-sensitive by
+    default, which made 'Concer' score 83 and suggest, while 'concer' scored 67
+    and silently suggested nothing."""
+    variants = ["Thyrox", "thyrox", "THYROX"]
+    results = [[(s.brand, round(s.score)) for s in reg.suggest(v)] for v in variants]
+    assert all(r == results[0] for r in results), f"case changed the result: {results}"
+    assert results[0][0][0] == "Thyroxel"
+
+
+def test_typo_inside_a_sentence_still_suggests(reg):
+    """A misspelled brand buried in a sentence scores poorly against the whole
+    string, so suggestions are also scored per word."""
+    sug = reg.suggest("thyrox is short")
+    assert [s.brand for s in sug][:1] == ["Thyroxel"]
+
+
+def test_sentence_with_unknown_drug_still_suggests_nothing(reg):
+    # per-word scoring must not open a false-positive path for gibberish
+    assert reg.suggest("zeroxan is short") == []
+    assert reg.suggest("qwerty is short") == []
 
 
 def test_unresolved_query_carries_suggestions(reg):

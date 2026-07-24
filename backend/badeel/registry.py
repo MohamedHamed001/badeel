@@ -17,7 +17,7 @@ import csv
 import re
 from functools import lru_cache
 
-from rapidfuzz import fuzz, process
+from rapidfuzz import fuzz, process, utils
 
 from .config import ALIASES_CSV, FUZZY_THRESHOLD, INGREDIENTS_CSV, PRODUCTS_CSV
 from .schemas import DrugQuery, Suggestion
@@ -107,30 +107,38 @@ class Registry:
 
     def suggest(self, text: str, limit: int = 3, floor: float = 70.0) -> list[Suggestion]:
         """Deterministic "did you mean?" candidates for a query that did not
-        resolve. Reuses the same fuzzy scorer as resolution, but keeps the
-        near-misses just *below* the acceptance threshold — a real typo surfaces
-        the right brand, while genuine gibberish (score < floor) yields nothing,
-        so an unknown drug stays unknown. Python proposes; the pharmacist picks."""
+        resolve. Only ever called on an unresolved query, so anything scoring at
+        or above `floor` is worth offering; genuine gibberish scores below it and
+        yields nothing, keeping an unknown drug unknown. Python proposes the
+        brands — all real registry entries — and the pharmacist confirms.
+
+        Scores the whole phrase *and* each individual word: a misspelled brand
+        buried in a sentence ("concer is short") scores poorly against the full
+        string but matches cleanly on its own token. Matching is
+        case-insensitive, so "concer" and "Concer" behave identically.
+        """
         raw = (text or "").strip()
         if not raw:
             return []
+        probes = [raw] + [w for w in _WORD.findall(raw)
+                          if len(w) >= 4 and not w.isdigit()]
         surfaces = list(self.surface_to_brand.keys())
-        hits = process.extract(raw, surfaces, scorer=fuzz.WRatio, limit=limit * 4)
-        out: list[Suggestion] = []
-        seen: set[str] = set()
-        for surface, score, _ in hits:
-            if score >= FUZZY_THRESHOLD or score < floor:
-                continue
-            brand = self.surface_to_brand[surface]
-            if brand in seen:
-                continue
-            seen.add(brand)
-            out.append(Suggestion(brand=brand,
-                                  ingredient=self.by_brand[brand]["ingredient"],
-                                  score=float(score)))
-            if len(out) >= limit:
-                break
-        return out
+
+        best: dict[str, float] = {}
+        for probe in probes:
+            for surface, score, _ in process.extract(
+                    probe, surfaces, scorer=fuzz.WRatio,
+                    processor=utils.default_process, limit=limit * 4):
+                if score < floor:
+                    continue
+                brand = self.surface_to_brand[surface]
+                if score > best.get(brand, 0.0):
+                    best[brand] = float(score)
+
+        ranked = sorted(best.items(), key=lambda kv: (-kv[1], kv[0]))[:limit]
+        return [Suggestion(brand=b,
+                           ingredient=self.by_brand[b]["ingredient"], score=s)
+                for b, s in ranked]
 
     def _match(self, norm: str, low: str) -> tuple[str | None, float]:
         # 1. exact alias
@@ -152,9 +160,13 @@ class Registry:
         if hits:
             _, _, brand = min(hits)
             return brand, 100.0
-        # 4. fuzzy over surface forms only (brands + Arabic names).
+        # 4. fuzzy over surface forms only (brands + Arabic names). Matching is
+        #    case-insensitive: without it "Marevn" scored 92 and resolved while
+        #    the same typo in lowercase scored 77 and did not — the outcome must
+        #    not depend on how the pharmacist capitalised the word.
         match = process.extractOne(
-            norm, list(self.surface_to_brand.keys()), scorer=fuzz.WRatio)
+            norm, list(self.surface_to_brand.keys()), scorer=fuzz.WRatio,
+            processor=utils.default_process)
         if match and match[1] >= FUZZY_THRESHOLD:
             return self.surface_to_brand[match[0]], float(match[1])
         # 5. unresolved

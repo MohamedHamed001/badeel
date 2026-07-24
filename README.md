@@ -61,11 +61,12 @@ either. Not for clinical use.
 * **Bilingual input** — accepts Arabic and English pharmacist queries, with brand,
   misspelling and transliteration resolution.
 * **"Did you mean?" suggestions** — a mistyped product surfaces the fuzzy resolver's
-  *near-misses* as one-click chips (real registered brands only, scoring just below the
-  acceptance threshold). A string that resembles nothing in the registry deliberately
-  gets **no** suggestion at all, so an unknown drug stays unknown rather than being
-  guessed into a real one. The LLM never chooses which drug the pipeline runs on —
-  Python proposes, the pharmacist confirms.
+  *near-misses* as one-click chips (real registered brands only). Matching is
+  case-insensitive and scored per word, so a typo works the same buried in a sentence
+  as on its own. A string that resembles nothing in the registry deliberately gets
+  **no** suggestion at all, so an unknown drug stays unknown rather than being guessed
+  into a real one. The LLM never chooses which drug the pipeline runs on — Python
+  proposes, the pharmacist confirms.
 * **Provider-agnostic LLM layer** — local Ollama or any OpenAI-compatible endpoint,
   selected purely by environment variables; embeddings always run locally and free.
 * **Professional dispensing UI** — three views with a signature "tier rail" that
@@ -76,7 +77,7 @@ either. Not for clinical use.
 * **Degrades gracefully** — with no model reachable the app still boots and serves the
   complete deterministic pipeline; only the prose and comprehension switch off.
 * **Reproducible, graded evaluation** — 30 adversarial cases, a harsh scorer, and a
-  CI-friendly deterministic test suite (53 tests, fully offline).
+  CI-friendly deterministic test suite (56 tests, fully offline).
 
 ---
 
@@ -122,7 +123,7 @@ backend/
     schemas.py  config.py  i18n.py
   prompts/*.md             versioned LLM prompt templates
   scripts/                 ingest.py · run_eval.py · compare_rerank.py
-  tests/                   53 offline tests
+  tests/                   56 offline tests
 frontend/src/              Vite + React + TS: views, components, i18n, api client
 data/                      synthetic dataset (graded) + data/real/ (demo)
 pharmacopeia.py            source of truth for the synthetic drug universe
@@ -201,7 +202,7 @@ out of stock` → a generic alternative with price and counselling. With `BADEEL
 ```bash
 python backend/scripts/run_eval.py --no-llm && python score.py predictions.jsonl   # deterministic
 python backend/scripts/run_eval.py         && python score.py predictions.jsonl   # full pipeline
-cd backend && pytest tests -q                                                      # 53 tests, offline
+cd backend && pytest tests -q                                                      # 56 tests, offline
 ```
 
 The evaluation always runs on the synthetic dataset with structured inputs, so the
