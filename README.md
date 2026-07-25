@@ -87,11 +87,13 @@ either. Not for clinical use.
 
 * Python 3.11, FastAPI, Uvicorn (JSON API + Server-Sent Events streaming)
 * LangChain — used as the provider abstraction (`ChatOllama` / `ChatOpenAI` behind one
-  `BaseChatModel` interface), so chains and the guard are written once and the backend
-  swaps by environment variable. Chains are deliberately **prompt-and-parse** rather
-  than LCEL pipelines: the guard validates with Pydantic *validation context* (the
-  allowlist) and retries by feeding the model its own error, which output parsers do
-  not cleanly support. No native tool calling, no agents.
+  `BaseChatModel` interface), so the chains and the guard are written once and the
+  backend swaps by environment variable. The chains (`chains.py`) and the JSON parsing
+  + structured-output validation (`guard.py`) are **hand-written rather than composed
+  from LangChain's `LLMChain` / LCEL / `PydanticOutputParser`**: the guard validates
+  with Pydantic *validation context* (the candidate allowlist) and retries by feeding
+  the model its own error, neither of which LangChain's output parsers support
+  cleanly. No native tool calling, no agents.
 * Pydantic v2 (data contracts + the validator guard)
 * Chroma (vector store) · `sentence-transformers` `BAAI/bge-small-en-v1.5` (local embeddings)
 * `BAAI/bge-reranker-base` cross-encoder (optional reranking)
