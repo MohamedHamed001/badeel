@@ -70,7 +70,6 @@ function kicker(s, text, y = 0.30) {
     ],
     { x: M, y: 6.15, w: W, h: 0.4, fontFace: B, fontSize: 13, margin: 0 },
   );
-  s.addNotes("Open calm. Name the project, then go straight to the problem — don't list technologies yet.");
 }
 
 /* ───────────────────────── 2. the problem ───────────────────────── */
@@ -105,7 +104,6 @@ function kicker(s, text, y = 0.30) {
   s.addText("So the pharmacist substitutes — and that is a clinical decision, made under pressure.", {
     x: M, y: 5.4, w: W, h: 0.5, fontFace: B, fontSize: 17, color: INK, italic: true, margin: 0,
   });
-  s.addNotes("Set the scene in three beats. End on: this is a clinical decision made under pressure.");
 }
 
 /* ───────────────────────── 3. the danger ───────────────────────── */
@@ -151,7 +149,6 @@ function kicker(s, text, y = 0.30) {
   s.addText("In a pharmacy, an unhelpful answer is safe. A wrong one is not.", {
     x: M, y: 5.5, w: W, h: 0.5, fontFace: B, fontSize: 17, color: INK, margin: 0,
   });
-  s.addNotes("This is the slide that frames everything. Land the contrast, then move on quickly.");
 }
 
 /* ───────────────────────── 4. the idea ───────────────────────── */
@@ -187,7 +184,6 @@ function kicker(s, text, y = 0.30) {
   s.addText("Because the decision is code, safety can be measured — not hoped for.", {
     x: M, y: 5.5, w: W, h: 0.5, fontFace: B, fontSize: 17, color: INK, italic: true, margin: 0,
   });
-  s.addNotes("Three roles, strictly separated. Say it plainly: the model finds facts, Python makes decisions.");
 }
 
 /* ───────────────────────── 5. how it works ───────────────────────── */
@@ -227,7 +223,6 @@ function kicker(s, text, y = 0.30) {
   s.addText("Safety runs before ranking — so a blocked first choice gives way to a safe one.", {
     x: M, y: 5.85, w: W, h: 0.5, fontFace: B, fontSize: 16, color: TEAL, italic: true, margin: 0,
   });
-  s.addNotes("Don't read all six. Say: it never suggests before it screens, and point at the last line.");
 }
 
 /* ───────────────────────── 6. the guard ───────────────────────── */
@@ -278,7 +273,6 @@ function kicker(s, text, y = 0.30) {
   s.addText("It fired 3 times across the 30 test cases — it is load-bearing, not decoration.", {
     x: M, y: 5.5, w: W, h: 0.5, fontFace: B, fontSize: 17, color: INK, margin: 0,
   });
-  s.addNotes("This is the 'new idea' the brief asks for. Use the doorman line — it lands with everyone.");
 }
 
 /* ───────────────────────── 7. demo ───────────────────────── */
@@ -306,7 +300,6 @@ function kicker(s, text, y = 0.30) {
     cases.map((c, i) => ({ text: c, options: { bullet: true, breakLine: i !== cases.length - 1 } })),
     { x: 5.4, y: 4.2, w: 7.2, h: 2.0, fontFace: B, fontSize: 15, color: MUT, margin: 0, paraSpaceAfter: 6 },
   );
-  s.addNotes("Switch to the browser here. Do NOT read this list aloud — it is a map for you.");
 }
 
 /* ───────────────────────── 8. results ───────────────────────── */
@@ -355,7 +348,6 @@ function kicker(s, text, y = 0.30) {
     ],
     { x: M + 0.45, y: 5.45, w: W - 0.9, h: 1.0, fontFace: B, fontSize: 15, valign: "middle", margin: 0 },
   );
-  s.addNotes("Lead with the two 100% rows side by side. The 7% -> 57% line is the punchline.");
 }
 
 /* ───────────────────────── 9. close ───────────────────────── */
@@ -379,7 +371,6 @@ function kicker(s, text, y = 0.30) {
   s.addText("Thank you — questions welcome.", {
     x: M, y: 6.2, w: 8.9, h: 0.5, fontFace: B, fontSize: 17, color: INK, bold: true, margin: 0,
   });
-  s.addNotes("Say the two lines slowly. Then stop talking and take questions.");
 }
 
 pres.writeFile({ fileName: process.argv[2] || "Badeel.pptx" }).then((f) => console.log("wrote", f));

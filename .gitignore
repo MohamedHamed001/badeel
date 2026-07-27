@@ -25,3 +25,7 @@ DECISIONS.md
 DEVELOPER_GUIDE.md
 Badeel-Developer-Guide.pdf
 *.pdf
+
+# annotated presentation kept locally, never shipped
+Badeel-Presentation-with-notes.pptx
+build_deck_with_notes.js
