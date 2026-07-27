@@ -122,7 +122,7 @@ def answer(text: str,
         detail=t(lang, "trace.nti.skip", ingredient=query.ingredient)))
 
     # 3. UPSTREAM — is the original prescription itself contraindicated?
-    leaflets = load_leaflets()
+    leaflets = load_leaflets(getattr(reg, "dataset", None))
     upstream = contraindication_flag(query.ingredient, query.patient_flags, leaflets, lang)
     if query.patient_flags:
         trace.append(TraceStep(
@@ -296,7 +296,7 @@ def _narrate(query, subs, reg, meta, lang="en"):
     from .schemas import Citation
 
     llm = get_llm()
-    retriever = get_retriever()
+    retriever = get_retriever(getattr(reg, "dataset", None))
     model = os.getenv("LLM_MODEL", "unknown")
     all_ings = set(reg.ing_by_name)
 
@@ -346,7 +346,7 @@ def _narrate_refusal(ans, query, reason_kind, reg, meta, lang="en"):
         # scope the search to the actual clinical trigger so the model grounds
         # on the RIGHT contraindication/interaction, not just any warning
         cue = " ".join(query.patient_flags + query.concurrent_meds) or reason_kind
-        evidence = get_retriever().search(
+        evidence = get_retriever(getattr(reg, "dataset", None)).search(
             f"{query.resolved_brand} {cue} contraindication interaction warning",
             scope=[query.ingredient], k=4)
         rationale, flags = narrate_refusal(

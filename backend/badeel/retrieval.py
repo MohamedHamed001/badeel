@@ -14,7 +14,6 @@ import re
 from functools import lru_cache
 
 from . import config
-from .config import CHROMA_DIR, LEAFLETS_DIR
 
 EMBED_MODEL = "BAAI/bge-small-en-v1.5"
 COLLECTION = "leaflets"
@@ -24,9 +23,10 @@ COLLECTION = "leaflets"
 RERANK_POOL = 20
 
 
-def _chunks():
+def _chunks(dataset: str | None = None):
     """Yield (id, text, metadata) for every H2 section of every leaflet."""
-    for path in sorted(LEAFLETS_DIR.glob("*.md")):
+    leaflets_dir = config.data_dir(dataset or config.DATASET) / "leaflets"
+    for path in sorted(leaflets_dir.glob("*.md")):
         text = path.read_text(encoding="utf-8")
         m = re.match(r"#\s+(.+)", text)
         ingredient = m.group(1).strip() if m else path.stem
@@ -57,18 +57,19 @@ class Retriever:
         self._ce = None   # cross-encoder, loaded lazily on first rerank
 
     @classmethod
-    def load(cls) -> "Retriever":
+    def load(cls, dataset: str | None = None) -> "Retriever":
         import chromadb
         from chromadb.utils import embedding_functions
         from rank_bm25 import BM25Okapi
 
-        client = chromadb.PersistentClient(path=str(CHROMA_DIR))
+        dataset = dataset or config.DATASET
+        client = chromadb.PersistentClient(path=str(config.chroma_dir(dataset)))
         ef = embedding_functions.SentenceTransformerEmbeddingFunction(
             model_name=EMBED_MODEL)
         col = client.get_or_create_collection(COLLECTION, embedding_function=ef)
 
         ids, texts, metas = [], [], []
-        for cid, text, meta in _chunks():
+        for cid, text, meta in _chunks(dataset):
             ids.append(cid)
             texts.append(text)
             metas.append(meta)
@@ -155,6 +156,8 @@ def _tok(text: str) -> list[str]:
     return re.findall(r"[a-z0-9]+", text.lower())
 
 
-@lru_cache(maxsize=1)
-def get_retriever() -> Retriever:
-    return Retriever.load()
+@lru_cache(maxsize=len(config.DATASETS))
+def get_retriever(dataset: str | None = None) -> Retriever:
+    """One retriever per dataset — each backed by its own Chroma index, so the
+    synthetic and real leaflet corpora are never searched together."""
+    return Retriever.load(dataset or config.DATASET)

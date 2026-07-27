@@ -12,11 +12,14 @@ async function json<T>(res: Response): Promise<T> {
   return (await res.json()) as T;
 }
 
+export type Dataset = "synthetic" | "real";
+
 export interface SubstituteRequest {
   text: string;
   patient_flags?: string[];
   concurrent_meds?: string[];
   lang?: "en" | "ar";
+  dataset?: Dataset;
 }
 
 export interface StreamHandlers {
@@ -80,8 +83,9 @@ export const api = {
       body: JSON.stringify(body),
     }).then(json<SubstitutionAnswer>);
   },
-  options(): Promise<RegistryOptions> {
-    return fetch("/api/registry/options").then(json<RegistryOptions>);
+  options(dataset?: Dataset): Promise<RegistryOptions> {
+    const qs = dataset ? `?dataset=${dataset}` : "";
+    return fetch(`/api/registry/options${qs}`).then(json<RegistryOptions>);
   },
   evalCases(): Promise<EvalCase[]> {
     return fetch("/api/eval/cases").then(json<EvalCase[]>);

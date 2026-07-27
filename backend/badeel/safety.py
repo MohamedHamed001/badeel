@@ -25,8 +25,8 @@ import csv
 import re
 from functools import lru_cache
 
+from . import config
 from .candidates import Candidate
-from .config import INTERACTIONS_CSV, LEAFLETS_DIR
 from .i18n import t
 from .schemas import Citation, SafetyFlag
 
@@ -72,10 +72,11 @@ class Leaflets:
                         section=section, snippet=snippet[:190])
 
 
-@lru_cache(maxsize=1)
-def load_leaflets() -> Leaflets:
+@lru_cache(maxsize=len(config.DATASETS))
+def load_leaflets(dataset: str | None = None) -> Leaflets:
     contra, notes, files = {}, {}, {}
-    for path in sorted(LEAFLETS_DIR.glob("*.md")):
+    leaflets_dir = config.data_dir(dataset or config.DATASET) / "leaflets"
+    for path in sorted(leaflets_dir.glob("*.md")):
         text = path.read_text(encoding="utf-8")
         name = _leaflet_ingredient(text)
         if not name:
@@ -86,11 +87,12 @@ def load_leaflets() -> Leaflets:
     return Leaflets(contra, notes, files)
 
 
-@lru_cache(maxsize=1)
-def load_interactions() -> dict[tuple[str, str], tuple[str, str]]:
+@lru_cache(maxsize=len(config.DATASETS))
+def load_interactions(dataset: str | None = None) -> dict[tuple[str, str], tuple[str, str]]:
     """(ingredient_a, ingredient_b) -> (severity, effect). Symmetric."""
     edges: dict[tuple[str, str], tuple[str, str]] = {}
-    with open(INTERACTIONS_CSV, encoding="utf-8") as f:
+    path = config.data_dir(dataset or config.DATASET) / "interactions.csv"
+    with open(path, encoding="utf-8") as f:
         for r in csv.DictReader(f):
             a, b = r["ingredient_a"], r["ingredient_b"]
             edges[(a, b)] = (r["severity"], r["effect"])
@@ -150,8 +152,9 @@ def screen(query, candidates: list[Candidate], reg, lang: str = "en"):
     Returns survivors (Candidates, with counselling_flags populated) and a list
     of (Candidate, SafetyFlag) for the rejected ones.
     """
-    leaflets = load_leaflets()
-    edges = load_interactions()
+    dataset = getattr(reg, "dataset", None)
+    leaflets = load_leaflets(dataset)
+    edges = load_interactions(dataset)
     q_components = reg.components(query.ingredient)
 
     survivors, blocked = [], []

@@ -20,6 +20,18 @@ class SubstituteRequest(BaseModel):
     concurrent_meds: list[str] = Field(default_factory=list)
     lang: Literal["en", "ar"] = "en"
 
+    # Which drug universe to answer from. `None` means "use the server default"
+    # (BADEEL_DATASET). The eval browser always sends "synthetic" so a labelled
+    # case is graded against the build its ground truth was authored for, even
+    # while the console is demoing real drugs.
+    #
+    # Deliberately a Literal: an unrecognised dataset is rejected with 422 rather
+    # than silently falling back. Answering from a different drug universe than
+    # the caller asked for is exactly the kind of quiet wrong answer this project
+    # exists to avoid. (Query-string callers are handled separately in main.py,
+    # where a bad value is non-fatal and falls back — see `_dataset`.)
+    dataset: Literal["synthetic", "real"] | None = None
+
 
 class Suggestion(BaseModel):
     """A near-miss brand for an unresolved query — a deterministic "did you

@@ -60,7 +60,7 @@ NARRATE = os.getenv("BADEEL_NARRATE", "0") == "1"
 @app.post("/api/substitute", response_model=SubstitutionAnswer)
 def substitute(req: SubstituteRequest) -> SubstitutionAnswer:
     return answer(req.text, req.patient_flags, req.concurrent_meds,
-                  get_registry(), narrate=NARRATE, lang=req.lang,
+                  get_registry(req.dataset), narrate=NARRATE, lang=req.lang,
                   comprehend=NARRATE)
 
 
@@ -75,7 +75,7 @@ def substitute_stream(req: SubstituteRequest):
     stream completes: if the streamed text names a non-permitted drug it is
     dropped. Falls back cleanly to a deterministic-only stream if no model is
     reachable or narration is off."""
-    reg = get_registry()
+    reg = get_registry(req.dataset)
     import time
     started = time.perf_counter()
 
@@ -99,7 +99,7 @@ def substitute_stream(req: SubstituteRequest):
             from badeel.retrieval import get_retriever
             from badeel.schemas import Citation
 
-            evidence = get_retriever().search(
+            evidence = get_retriever(reg.dataset).search(
                 f"{q.resolved_brand} {sub.ingredient} substitution",
                 scope=[sub.ingredient, q.ingredient], k=4)
             # prose may name the substitute, the queried drug, the patient's own
@@ -147,8 +147,8 @@ def substitute_stream(req: SubstituteRequest):
 
 
 @app.get("/api/registry/products")
-def registry_products():
-    reg = get_registry()
+def registry_products(dataset: str | None = None):
+    reg = get_registry(_dataset(dataset))
     return [
         {"sku": p["sku"], "brand": p["brand"], "brand_ar": p["brand_ar"],
          "ingredient": p["ingredient"], "strength": p["strength"],
@@ -159,14 +159,16 @@ def registry_products():
 
 
 @app.get("/api/registry/options")
-def registry_options():
+def registry_options(dataset: str | None = None):
     """Multiselect vocabularies derived from the data, not hardcoded in the UI.
     patient_flags is the controlled set the safety layer actually understands;
-    concurrent_meds are ingredient names the patient might already be taking."""
-    reg = get_registry()
+    concurrent_meds are ingredient names the patient might already be taking.
+    The ingredient list follows whichever dataset the console is showing."""
+    reg = get_registry(_dataset(dataset))
     return {
         "patient_flags": sorted(FLAG_KEYWORDS.keys()),
         "ingredients": sorted(reg.ing_by_name.keys()),
+        "dataset": reg.dataset,
     }
 
 
@@ -193,12 +195,19 @@ def health():
         "model": config.LLM_MODEL,
         "chroma_docs": _doc_count(),
         "narration": "enabled" if NARRATE else "stubbed",
-        "dataset": config.DATASET,
+        "dataset": config.DATASET,           # the server default
+        "datasets": list(config.DATASETS),   # what the UI may switch between
         "rerank": "on" if config.RERANK else "off",
     }
 
 
 # ---- helpers -----------------------------------------------------------
+
+def _dataset(value: str | None) -> str | None:
+    """Query-string datasets arrive as free text (unlike the JSON body, which
+    Pydantic validates). Unknown values fall back to the server default rather
+    than erroring — a bad query string should not break the console."""
+    return value if value in config.DATASETS else None
 
 def _doc_count() -> int:
     """Documents available to the RAG layer. Before the Chroma index exists

@@ -106,6 +106,7 @@ export interface SubstitutionAnswer {
 export interface RegistryOptions {
   patient_flags: string[];
   ingredients: string[];
+  dataset?: string;
 }
 
 export interface EvalCase {
@@ -130,4 +131,6 @@ export interface Health {
   chroma_docs: number;
   narration: string;
   dataset: string;
+  datasets?: string[];
+  rerank?: string;
 }

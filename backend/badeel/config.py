@@ -6,22 +6,38 @@ from pathlib import Path
 # Repo root is two levels up from this file: backend/badeel/config.py -> root
 ROOT = Path(__file__).resolve().parents[2]
 
-# Dataset selection. "synthetic" (default) is the graded/eval build; "real" is
-# the demo dataset of real ingredients + real Egyptian brand names in
-# data/real/. Chosen at process start via BADEEL_DATASET.
+# Dataset selection. "synthetic" is the graded/eval build (ground truth true by
+# construction); "real" is the demo build of real ingredients + real Egyptian
+# brand names in data/real/. The two are kept completely separate — never merged
+# — so a synthetic eval query can never resolve against a real brand.
+#
+# BADEEL_DATASET sets the *default*, but each request may pick its own, so the
+# demo can run on real drugs while the eval browser still runs on synthetic.
+DATASETS = ("synthetic", "real")
 DATASET = os.getenv("BADEEL_DATASET", "synthetic").lower()
-_REAL = DATASET == "real"
+if DATASET not in DATASETS:
+    DATASET = "synthetic"
 
-DATA = ROOT / "data" / "real" if _REAL else ROOT / "data"
 
+def data_dir(dataset: str) -> Path:
+    """Directory holding one dataset's CSVs and leaflets."""
+    return ROOT / "data" / "real" if dataset == "real" else ROOT / "data"
+
+
+def chroma_dir(dataset: str) -> Path:
+    """Persisted vector index, one per dataset."""
+    return ROOT / ("chroma_real" if dataset == "real" else "chroma")
+
+
+# Default-dataset paths, kept for scripts and tests that work on one build.
+DATA = data_dir(DATASET)
 INGREDIENTS_CSV = DATA / "ingredients.csv"
 PRODUCTS_CSV = DATA / "products.csv"
 ALIASES_CSV = DATA / "aliases.csv"
 INTERACTIONS_CSV = DATA / "interactions.csv"
 LEAFLETS_DIR = DATA / "leaflets"
 
-# Persisted Chroma index (per dataset) and the latest eval report at the root.
-CHROMA_DIR = ROOT / ("chroma_real" if _REAL else "chroma")
+CHROMA_DIR = chroma_dir(DATASET)
 EVAL_REPORT = ROOT / "eval_report.json"
 
 # The evaluation is defined on the synthetic dataset only (its ground truth is

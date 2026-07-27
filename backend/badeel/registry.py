@@ -19,7 +19,8 @@ from functools import lru_cache
 
 from rapidfuzz import fuzz, process, utils
 
-from .config import ALIASES_CSV, FUZZY_THRESHOLD, INGREDIENTS_CSV, PRODUCTS_CSV
+from . import config
+from .config import FUZZY_THRESHOLD
 from .schemas import DrugQuery, Suggestion
 
 # Word tokens including Arabic script.
@@ -27,7 +28,11 @@ _WORD = re.compile(r"[\w؀-ۿ]+", re.UNICODE)
 
 
 class Registry:
-    def __init__(self, products, ingredients, aliases):
+    def __init__(self, products, ingredients, aliases, dataset="synthetic"):
+        # Which build this registry was loaded from. Carried on the object so
+        # downstream layers (safety, retrieval) read the matching leaflets
+        # without having to be told separately.
+        self.dataset = dataset
         self.products = products                     # list[dict]
         self.ingredients = {i["ingredient_id"]: i for i in ingredients}
         self.ing_by_name = {i["name"]: i for i in ingredients}
@@ -59,11 +64,14 @@ class Registry:
     # ---- construction -------------------------------------------------
 
     @classmethod
-    def load(cls) -> "Registry":
+    def load(cls, dataset: str | None = None) -> "Registry":
+        dataset = dataset or config.DATASET
+        data = config.data_dir(dataset)
         return cls(
-            products=_read_csv(PRODUCTS_CSV),
-            ingredients=_read_csv(INGREDIENTS_CSV),
-            aliases=_read_csv(ALIASES_CSV),
+            products=_read_csv(data / "products.csv"),
+            ingredients=_read_csv(data / "ingredients.csv"),
+            aliases=_read_csv(data / "aliases.csv"),
+            dataset=dataset,
         )
 
     # ---- metadata accessors ------------------------------------------
@@ -188,7 +196,8 @@ def _read_csv(path) -> list[dict]:
         return list(csv.DictReader(f))
 
 
-@lru_cache(maxsize=1)
-def get_registry() -> Registry:
-    """Process-wide singleton so CSVs load once."""
-    return Registry.load()
+@lru_cache(maxsize=len(config.DATASETS))
+def get_registry(dataset: str | None = None) -> Registry:
+    """One cached Registry per dataset, so both builds can be served side by
+    side without reloading CSVs — and without ever being merged."""
+    return Registry.load(dataset or config.DATASET)
